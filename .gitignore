@@ -6,3 +6,4 @@ cs532-spark-benchmark
 .cursor
 skills-lock.json
 build
+.env
