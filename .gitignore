@@ -1,3 +1,9 @@
 data/
 __pycache__/
 *.pyc
+cs532-spark-benchmark
+.agents
+.cursor
+skills-lock.json
+build
+.env
