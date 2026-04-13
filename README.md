@@ -6,11 +6,18 @@ Group Members: Atharva Kale, Gnaneswarudu Kuna, Kwame Afriyie Osei-Tutu, Rishab 
 ## Setup Instructions
 
 1. Create and activate a virtual environment:
-```bash
+
+Windows (Powershell):
+```powershell
     python -m venv cs532-spark-benchmark
-    source cs532-spark-benchmark/bin/activate
+    cs532-spark-benchmark\Scripts\Activate.ps1
 ```
-    > On Windows: `cs532-spark-benchmark\Scripts\activate`
+
+Linux:
+```bash
+    python -m venv 532-spark-bmark-linux
+    source 532-spark-bmark-linux/bin/activate
+```
 
 2. Install all dependencies:
 ```bash
@@ -18,6 +25,11 @@ Group Members: Atharva Kale, Gnaneswarudu Kuna, Kwame Afriyie Osei-Tutu, Rishab 
 ```
 
 3. Install **Java 21** (required for PySpark in this repo). Set **`JAVA_HOME`** in **`.env`** if Spark cannot find `java` (see **`.env.example`**).
+
+Note: On WSL, it seems like PySpark requires Java 17. Run this to install it:
+```bash
+    sudo apt install openjdk-17-jdk -y
+```
 
 ## Run preprocessing pipeline
 
