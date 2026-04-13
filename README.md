@@ -5,6 +5,7 @@ Group Members: Atharva Kale, Gnaneswarudu Kuna, Kwame Afriyie Osei-Tutu, Rishab 
 
 ## Setup Instructions
 
+### It is highly recommended that you run this on WSL if you have a Windows machine! It's much easier.
 1. Create and activate a virtual environment:
 
 Windows (Powershell):
