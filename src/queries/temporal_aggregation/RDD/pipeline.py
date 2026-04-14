@@ -38,8 +38,8 @@ def run(spark: SparkSession, parquet_path: str) -> dict:
     # Error rate per hour: we need to compute total requests and error requests per hour
     # Then join them and compute error rate as error_requests / total_requests
     total_requests_per_hour = rdd.map(lambda row: (row[0].hour, 1)).reduceByKey(lambda a, b: a + b)
-    error_requests_per_hour = rdd.filter(lambda row: row[2] >= 400).map(lambda row: (row[0].hour, 1)).reduceByKey(lambda a, b: a + b)
-    error_rate_per_hour = total_requests_per_hour.join(error_requests_per_hour).map(lambda x: (x[0], x[1][1] / x[1][0] if x[1][0] > 0 else 0)).sortBy(lambda x: -x[1])
+    error_requests_per_hour = rdd.filter(lambda row: 400 <= row[2] < 600).map(lambda row: (row[0].hour, 1)).reduceByKey(lambda a, b: a + b)
+    error_rate_per_hour = total_requests_per_hour.join(error_requests_per_hour).map(lambda x: (x[0], x[1][1] / x[1][0] * 100)).sortBy(lambda x: -x[1])
 
     return {
         "requests_per_hour": requests_per_hour.collect(),
@@ -73,4 +73,4 @@ if __name__ == "__main__":
     
     print("\nError rate per hour:")
     for hour, error_rate in results["error_rate_per_hour"]:
-        print(f"{hour}:00 : {error_rate:.4%} error rate")
+        print(f"{hour}:00 : {error_rate:.4%}% error rate")

@@ -17,8 +17,8 @@ def run(spark: SparkSession, parquet_path: str) -> dict:
     rdd = read_parquet_into_rdd(spark, parquet_path, COLS).map(parse_row_to_tuple).cache()
 
 
-    # Filter to only error rows (status_code >= 400)
-    error_rdd_raw = rdd.filter(lambda row: row[1] >= 400).cache()
+    # Filter to only error rows (400 <= status_code < 600)
+    error_rdd_raw = rdd.filter(lambda row: 400 <= row[1] < 600).cache()
     # Map to (endpoint, 1) for counting so key is endpoint and value is count of 1 for each error occurrence
     error_rdd = error_rdd_raw.map(lambda row: (row[0], 1)) 
 
