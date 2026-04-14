@@ -24,7 +24,7 @@ def run(spark: SparkSession, parquet_path: str) -> dict:
 
     # 1) Total number of requests per host
     # Map to (client_ip, 1) for counting total requests per host
-    requests_per_host = rdd.map(lambda row: (row[0], 1)).reduceByKey(lambda a, b: a + b).sortBy(lambda x: -x[1])
+    requests_per_host = rdd.map(lambda row: (row[0], 1)).reduceByKey(lambda a, b: a + b).sortBy(lambda x: -x[1]).cache()
 
     # 2) Total bytes sent per host
     bytes_per_host = rdd.map(lambda row: (row[0], row[3] if row[3] is not None else 0)).reduceByKey(lambda a, b: a + b).sortBy(lambda x: -x[1])
