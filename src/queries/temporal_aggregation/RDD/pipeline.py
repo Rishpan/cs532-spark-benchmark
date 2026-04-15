@@ -16,7 +16,7 @@ TOP_N = 10
 
 def build_queries(spark: SparkSession, parquet_path: str) -> dict:
     # First, read the parquet file into an RDD and parse it into tuples
-    rdd = read_parquet_into_rdd(spark, parquet_path, COLS).map(parse_row_to_tuple).cache()
+    rdd = read_parquet_into_rdd(spark, parquet_path, COLS).map(parse_row_to_tuple)
 
     # map to (hour, (1, bytes, 1 if error/0 if not error))
     mapped_rdd = rdd.map(lambda row: (

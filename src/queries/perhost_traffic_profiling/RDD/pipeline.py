@@ -21,7 +21,7 @@ TOP_N = 10
 
 def build_queries(spark: SparkSession, parquet_path: str) -> dict:
     # First, read the parquet file into an RDD and parse it into tuples
-    rdd = read_parquet_into_rdd(spark, parquet_path, COLS).map(parse_row_to_tuple).cache()
+    rdd = read_parquet_into_rdd(spark, parquet_path, COLS).map(parse_row_to_tuple)
 
     # Map to (client_ip, (requests_per_host, bytes_per_host, error_requests_per_host, {endpoint})) for counting total requests, bytes, and error requests per host
     # we use frozenset to make it hashable for reduceByKey

@@ -14,7 +14,7 @@ COLS = ["request_path", "status_code"]
 TOP_N = 10
 
 def build_queries(spark: SparkSession, parquet_path: str) -> dict:
-    rdd = read_parquet_into_rdd(spark, parquet_path, COLS).map(parse_row_to_tuple).cache()
+    rdd = read_parquet_into_rdd(spark, parquet_path, COLS).map(parse_row_to_tuple)
 
     total = rdd.count()
 
