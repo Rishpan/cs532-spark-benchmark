@@ -7,5 +7,5 @@ cs532-spark-benchmark
 skills-lock.json
 build
 .env
-src/queries/temporal_aggregation/RDD/pipeline.py
 .DS_Store
+532-spark-bmark-linux
