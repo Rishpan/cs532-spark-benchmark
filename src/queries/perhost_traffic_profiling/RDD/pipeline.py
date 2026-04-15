@@ -49,36 +49,6 @@ def build_queries(spark: SparkSession, parquet_path: str) -> dict:
 
     return out_master_rdd
 
-    # # 1) Total number of requests per host
-    # # Map to (client_ip, 1) for counting total requests per host
-    # requests_per_host = rdd.map(lambda row: (row[0], 1)).reduceByKey(lambda a, b: a + b).sortBy(lambda x: -x[1]).cache()
-
-    # # 2) Total bytes sent per host
-    # bytes_per_host = rdd.map(lambda row: (row[0], row[3] if row[3] is not None else 0)).reduceByKey(lambda a, b: a + b).sortBy(lambda x: -x[1])
-
-    # # 3) Average bytes per request per host
-    # # jOIN total bytes and total requests to compute average bytes per request
-    # average_bytes_per_host = bytes_per_host.join(requests_per_host).map(lambda x: (x[0], x[1][0] / x[1][1])).sortBy(lambda x: -x[1])
-
-    # # 4) Error rate per host (percentage of requests that resulted in an error status code, i.e., 4xx and 5xx)
-    # error_counts = rdd.filter(lambda row: 400 <= row[2] < 600).map(lambda row: (row[0], 1)).reduceByKey(lambda a, b: a + b)
-    # error_rate_per_host = error_counts.join(requests_per_host).map(lambda x: (x[0], x[1][0] / x[1][1] * 100)).sortBy(lambda x: -x[1])
-
-    # # 5) Distinct endpoints accessed per host
-    # # First, map to (client_ip, request_path)
-    # # Then use distinct to get unique (client_ip, request_path) pairs, and map to (client_ip, 1) to count distinct endpoints per host
-    # distinct_endpoints_per_host = rdd.map(lambda row: (row[0], row[1])).distinct().map(lambda x: (x[0], 1)).reduceByKey(lambda a, b: a + b).sortBy(lambda x: -x[1])
-
-    # return {
-    #     "requests_per_host": requests_per_host,
-    #     "bytes_per_host": bytes_per_host,
-    #     "average_bytes_per_host": average_bytes_per_host,
-    #     "error_rate_per_host": error_rate_per_host,
-    #     "distinct_endpoints_per_host": distinct_endpoints_per_host
-    # }
-    
-
-
 if __name__ == "__main__":
     load_env()
     parquet_path = require_env("OUTPUT_PARQUET_PATH")
@@ -102,25 +72,3 @@ if __name__ == "__main__":
     print("\nTop hosts by most endpoints accessed:")
     for r in sorted(res, key=lambda x: -x[5])[:TOP_N]:
         print(f"{get_hostname(r[0])}: distinct_endpoints={r[5]}")
-
-    # Only print the first 10 results for each metric to avoid overwhelming the output
-
-    # print("Total requests per host:")
-    # for host, count in results["requests_per_host"].take(TOP_N):
-    #     print(f"{get_hostname(host)}: {count}")
-
-    # print("\nTotal bytes sent per host:")
-    # for host, bytes_sent in results["bytes_per_host"].take(TOP_N):
-    #     print(f"{get_hostname(host)}: {bytes_sent}")
-
-    # print("\nAverage bytes per request per host:")
-    # for host, avg_bytes in results["average_bytes_per_host"].take(TOP_N):
-    #     print(f"{get_hostname(host)}: {avg_bytes:.2f}")
-
-    # print("\nError rate per host:")
-    # for host, error_rate in results["error_rate_per_host"].take(TOP_N):
-    #     print(f"{get_hostname(host)}: {error_rate:.2f}%")
-
-    # print("\nDistinct endpoints accessed per host:")
-    # for host, distinct_endpoints in results["distinct_endpoints_per_host"].take(TOP_N):
-    #     print(f"{get_hostname(host)}: {distinct_endpoints}")

@@ -31,31 +31,6 @@ def build_queries(spark: SparkSession, parquet_path: str) -> dict:
     
     return metrics_per_host
 
-    # # 1) Total number of requests per host
-    # requests_per_host = df.groupBy("client_ip").count().orderBy("count", ascending=False)
-
-    # # 2) Total bytes sent per host
-    # bytes_per_host = df.groupBy("client_ip").agg(F.sum("response_bytes").alias("total_bytes")).orderBy("total_bytes", ascending=False)
-
-    # # 3) Average bytes per request per host
-    # average_bytes_per_host = df.groupBy("client_ip").agg(F.avg("response_bytes").alias("average_bytes")).orderBy("average_bytes", ascending=False)
-
-    # # 4) Error rate per host (percentage of requests that resulted in an error status code, i.e., 4xx and 5xx)
-    # error_rate_per_host = df.groupBy("client_ip").agg(
-    #     (F.sum(F.when(F.col("status_code") >= 400, 1).otherwise(0)) /F.count("*") * 100).alias("error_rate")
-    # ).orderBy("error_rate", ascending=False)
-
-    # # 5) Distinct endpoints accessed per host
-    # distinct_endpoints_per_host = df.groupBy("client_ip").agg(F.countDistinct("request_path").alias("distinct_endpoints")).orderBy("distinct_endpoints", ascending=False)
-
-
-    # return {
-    #     "requests_per_host": requests_per_host,
-    #     "bytes_per_host": bytes_per_host,
-    #     "average_bytes_per_host": average_bytes_per_host,
-    #     "error_rate_per_host": error_rate_per_host,
-    #     "distinct_endpoints_per_host": distinct_endpoints_per_host
-    # }
 
 if __name__ == "__main__":
     load_env()
