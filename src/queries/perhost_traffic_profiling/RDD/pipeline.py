@@ -1,10 +1,10 @@
 ''' This uses the RDD API to implement the per-host traffic profiling query. It reads the parquet file into an RDD, performs the necessary transformations and actions to compute the traffic profiles for each host, and then saves the results to an output file. The traffic profile includes metrics such as total requests, 
 average response time, and request distribution by status code for each host. '''
 ''' We will compute the following metrics for each host:
-1) Total number of requests per host, in descending order of frequency.
-2) Total bytes sent per host, in descending order of total bytes.
-3) Average bytes per request per host, in descending order of average bytes.
-4) Error rate per host (percentage of requests that resulted in an error status code, i.e., 4xx and 5xx), in descending order of error rate.
+1) Total number of requests per host
+2) Total bytes sent per host
+3) Average bytes per request per host
+4) Error rate per host (percentage of requests that resulted in an error status code, i.e., 4xx and 5xx)
 5) Distinct endpoints accessed per host.
 '''
 
