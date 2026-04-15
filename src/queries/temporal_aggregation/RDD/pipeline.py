@@ -39,7 +39,7 @@ def run(spark: SparkSession, parquet_path: str) -> dict:
     # Then join them and compute error rate as error_requests / total_requests
     total_requests_per_hour = rdd.map(lambda row: (row[0].hour, 1)).reduceByKey(lambda a, b: a + b)
     error_requests_per_hour = rdd.filter(lambda row: 400 <= row[2] < 600).map(lambda row: (row[0].hour, 1)).reduceByKey(lambda a, b: a + b)
-    error_rate_per_hour = total_requests_per_hour.join(error_requests_per_hour).map(lambda x: (x[0], x[1][1] / x[1][0] * 100)).sortBy(lambda x: -x[1])
+    error_rate_per_hour = total_requests_per_hour.join(error_requests_per_hour).map(lambda x: (x[0], x[1][1] / x[1][0])).sortBy(lambda x: -x[1])
 
     return {
         "requests_per_hour": requests_per_hour.collect(),
