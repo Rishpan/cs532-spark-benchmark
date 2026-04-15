@@ -1,5 +1,4 @@
-''' This uses the DataFrame API to implement the per-host traffic profiling query. It reads the parquet file into a DataFrame, performs the necessary transformations and actions to compute the traffic profiles for each host, and then saves the results to an output file. The traffic profile includes metrics such as total requests, 
-average response time, and request distribution by status code for each host. '''
+''' This uses the DataFrame API to implement the per-host traffic profiling query. It reads the parquet file into a DataFrame, performs the necessary transformations and actions to compute the traffic profiles for each host. '''
 ''' We will compute the following metrics for each host:
 1) Total number of requests per host
 2) Total bytes sent per host
