@@ -5,6 +5,7 @@
 # 3) Average bytes per request per hour
 # 4) Error rate per hour (errors/total)
 # 5) Total bytes per hour
+from datetime import datetime, timezone
 
 from pyspark.sql import SparkSession
 from src.rdd_utils import read_parquet_into_rdd
@@ -20,7 +21,7 @@ def build_queries(spark: SparkSession, parquet_path: str) -> dict:
 
     # map to (hour, (1, bytes, 1 if error/0 if not error))
     mapped_rdd = rdd.map(lambda row: (
-        row[0].hour,
+        datetime.fromtimestamp(row[0], tz=timezone.utc).hour,
         (1, row[1] if row[1] is not None else 0, 1 if 400 <= row[2] < 600 else 0)
     ))
 
@@ -38,28 +39,28 @@ def build_queries(spark: SparkSession, parquet_path: str) -> dict:
         x[1][2] / x[1][0] * 100 if x[1][0] > 0 else 0
     ))
 
-    daily_master_rdd = rdd.map(lambda row: (row[0].date(), 1)).reduceByKey(lambda a, b: a + b)
+    daily_master_rdd = rdd.map(lambda row: (datetime.fromtimestamp(row[0], tz=timezone.utc).date(), 1)).reduceByKey(lambda a, b: a + b)
 
     return out_hour_master_rdd, daily_master_rdd
     # 
     # Note: Timestamps are datetime.date objects
 
     # # Map to (hour, 1) for counting total requests per hour
-    # requests_per_hour = rdd.map(lambda row: (row[0].hour, 1)). \
+    # requests_per_hour = rdd.map(lambda row: (datetime.fromtimestamp(row[0], tz=timezone.utc).hour, 1)). \
     #     reduceByKey(lambda a, b: a + b).sortBy(lambda x: -x[1])
     
     # # Map to (day, 1) for counting total requests per day
-    # requests_per_day = rdd.map(lambda row: (row[0].date(), 1)). \
+    # requests_per_day = rdd.map(lambda row: (datetime.fromtimestamp(row[0], tz=timezone.utc).date(), 1)). \
     #     reduceByKey(lambda a, b: a + b).sortBy(lambda x: -x[1])
 
     # # Group by hour and sum response bytes for bytes transferred per hour
-    # bytes_per_hour = rdd.map(lambda row: (row[0].hour, row[1] if row[1] is not None else 0)). \
+    # bytes_per_hour = rdd.map(lambda row: (datetime.fromtimestamp(row[0], tz=timezone.utc).hour, row[1] if row[1] is not None else 0)). \
     #     reduceByKey(lambda a, b: a + b).sortBy(lambda x: -x[1])
     
     # # Error rate per hour: we need to compute total requests and error requests per hour
     # # Then join them and compute error rate as error_requests / total_requests
-    # total_requests_per_hour = rdd.map(lambda row: (row[0].hour, 1)).reduceByKey(lambda a, b: a + b)
-    # error_requests_per_hour = rdd.filter(lambda row: 400 <= row[2] < 600).map(lambda row: (row[0].hour, 1)).reduceByKey(lambda a, b: a + b)
+    # total_requests_per_hour = rdd.map(lambda row: (datetime.fromtimestamp(row[0], tz=timezone.utc).hour, 1)).reduceByKey(lambda a, b: a + b)
+    # error_requests_per_hour = rdd.filter(lambda row: 400 <= row[2] < 600).map(lambda row: (datetime.fromtimestamp(row[0], tz=timezone.utc).hour, 1)).reduceByKey(lambda a, b: a + b)
     # error_rate_per_hour = total_requests_per_hour.join(error_requests_per_hour).map(lambda x: (x[0], x[1][1] / x[1][0] * 100)).sortBy(lambda x: -x[1])
 
     # return {
@@ -80,7 +81,7 @@ if __name__ == "__main__":
 
     print("Total requests per day:")
     for r in sorted(res2, key=lambda x: -x[1])[:TOP_N]:
-        print(f"{r[0]}: requests={r[1]}")
+        print(f"Date: {r[0]}, requests={r[1]}")
     
     print("\nHours by highest request volume:")
     for r in sorted(res1, key=lambda x: -x[1])[:TOP_N]:
