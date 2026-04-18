@@ -26,7 +26,7 @@ def build_queries(spark: SparkSession, parquet_path: str) -> dict:
 
     # 1) Total number of requests per host
     # Map to (client_ip, 1) for counting total requests per host
-    requests_per_host = rdd.map(lambda row: (row[0], 1)).reduceByKey(lambda a, b: a + b)
+    requests_per_host = rdd.map(lambda row: (row[0], int(1))).reduceByKey(lambda a, b: a + b)
 
     # 2) Total bytes sent per host
     bytes_per_host = rdd.map(lambda row: (row[0], row[3] if row[3] is not None else 0)).reduceByKey(lambda a, b: a + b)
@@ -36,13 +36,14 @@ def build_queries(spark: SparkSession, parquet_path: str) -> dict:
     average_bytes_per_host = bytes_per_host.join(requests_per_host).map(lambda x: (x[0], x[1][0] / x[1][1]))
 
     # 4) Error rate per host (percentage of requests that resulted in an error status code, i.e., 4xx and 5xx)
-    error_counts = rdd.filter(lambda row: 400 <= row[2] < 600).map(lambda row: (row[0], 1)).reduceByKey(lambda a, b: a + b)
-    error_rate_per_host = error_counts.join(requests_per_host).map(lambda x: (x[0], x[1][0] / x[1][1] * 100))
+    # leftOuterJoin from requests_per_host so hosts with zero errors are included (error_count defaults to 0)
+    error_counts = rdd.filter(lambda row: 400 <= row[2] < 600).map(lambda row: (row[0], int(1))).reduceByKey(lambda a, b: a + b)
+    error_rate_per_host = requests_per_host.leftOuterJoin(error_counts).map(lambda x: (x[0], (x[1][1] or 0) / x[1][0] * 100))
 
     # 5) Distinct endpoints accessed per host
     # First, map to (client_ip, request_path)
     # Then use distinct to get unique (client_ip, request_path) pairs, and map to (client_ip, 1) to count distinct endpoints per host
-    distinct_endpoints_per_host = rdd.map(lambda row: (row[0], row[1])).distinct().map(lambda x: (x[0], 1)).reduceByKey(lambda a, b: a + b)
+    distinct_endpoints_per_host = rdd.map(lambda row: (row[0], row[1])).distinct().map(lambda x: (x[0], int(1))).reduceByKey(lambda a, b: a + b)
 
     return {
         "requests_per_host": requests_per_host,

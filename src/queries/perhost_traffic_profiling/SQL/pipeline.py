@@ -7,7 +7,7 @@
 5) Distinct endpoints accessed per host.
 '''
 
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, DataFrame
 
 from src.sql_utils import read_parquet_into_tmpview
 from src.sql_utils import get_hostname
@@ -15,7 +15,7 @@ from src.session import get_spark_session, load_env, require_env
 
 TOP_N = 10
 
-def build_queries(spark: SparkSession, parquet_path: str, view_name: str) -> str:
+def build_queries(spark: SparkSession, parquet_path: str, view_name: str) -> DataFrame:
     # First, read the parquet file into a temporary view
     read_parquet_into_tmpview(spark, parquet_path, view_name)
 

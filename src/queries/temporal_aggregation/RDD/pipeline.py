@@ -15,7 +15,7 @@ from src.session import get_spark_session, load_env, require_env
 COLS = ["log_ts", "response_bytes", "status_code"]
 TOP_N = 10
 
-def build_queries(spark: SparkSession, parquet_path: str) -> dict:
+def build_queries(spark: SparkSession, parquet_path: str) -> tuple:
     # First, read the parquet file into an RDD and parse it into tuples
     rdd = read_parquet_into_rdd(spark, parquet_path, COLS).map(parse_row_to_tuple)
 
@@ -39,7 +39,7 @@ def build_queries(spark: SparkSession, parquet_path: str) -> dict:
         x[1][2] / x[1][0] * 100 if x[1][0] > 0 else 0
     ))
 
-    daily_master_rdd = rdd.map(lambda row: (datetime.fromtimestamp(row[0], tz=timezone.utc).date(), 1)).reduceByKey(lambda a, b: a + b)
+    daily_master_rdd = rdd.map(lambda row: (datetime.fromtimestamp(row[0], tz=timezone.utc).date(), int(1))).reduceByKey(lambda a, b: a + b)
 
     return out_hour_master_rdd, daily_master_rdd
     # 

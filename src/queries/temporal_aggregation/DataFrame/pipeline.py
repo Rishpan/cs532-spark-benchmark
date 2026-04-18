@@ -15,7 +15,7 @@ from src.df_utils import get_hostname
 
 TOP_N = 10
 
-def build_queries(spark: SparkSession, parquet_path: str) -> dict:
+def build_queries(spark: SparkSession, parquet_path: str) -> tuple:
     # First, read the parquet file into a DataFrame
     df = read_parquet_into_df(spark, parquet_path)
 

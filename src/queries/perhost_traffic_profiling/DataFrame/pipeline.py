@@ -7,7 +7,7 @@
 5) Distinct endpoints accessed per host.
 '''
 
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql import functions as F
 
 from src.session import get_spark_session, load_env, require_env
@@ -16,7 +16,7 @@ from src.df_utils import get_hostname
 
 TOP_N = 10
 
-def build_queries(spark: SparkSession, parquet_path: str) -> dict:
+def build_queries(spark: SparkSession, parquet_path: str) -> DataFrame:
     # First, read the parquet file into a DataFrame
     df = read_parquet_into_df(spark, parquet_path)
 
@@ -26,7 +26,7 @@ def build_queries(spark: SparkSession, parquet_path: str) -> dict:
         F.sum("response_bytes").alias("total_bytes"),
         F.avg("response_bytes").alias("average_bytes"),
         (F.sum(F.when(F.col("status_code") >= 400, 1).otherwise(0)) /F.count("*") * 100).alias("error_rate"),
-        F.countDistinct("request_path").alias("distinct_endpoints")
+        F.count_distinct("request_path").alias("distinct_endpoints")
     )
     
     return metrics_per_host
