@@ -8,6 +8,7 @@
 '''
 
 from pyspark.sql import SparkSession
+from pyspark import RDD
 
 from src.rdd_utils import read_parquet_into_rdd
 from src.rdd_utils import parse_row_to_tuple
@@ -18,7 +19,7 @@ from src.session import get_spark_session, load_env, require_env
 COLS = ["client_ip", "request_path", "status_code", "response_bytes"]
 TOP_N = 10
 
-def build_queries(spark: SparkSession, parquet_path: str) -> dict:
+def build_queries(spark: SparkSession, parquet_path: str) -> RDD:
     # First, read the parquet file into an RDD and parse it into tuples
     rdd = read_parquet_into_rdd(spark, parquet_path, COLS).map(parse_row_to_tuple)
 

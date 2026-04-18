@@ -23,7 +23,7 @@ def build_queries(spark: SparkSession, parquet_path: str) -> dict:
     df = read_parquet_into_df(spark, parquet_path)
 
     # 1) Total number of requests per host
-    requests_per_host = df.groupBy("client_ip").count().orderBy("count", ascending=False)
+    requests_per_host = df.groupBy("client_ip").agg(F.count("*").alias("total_requests")).orderBy("total_requests", ascending=False)
 
     # 2) Total bytes sent per host
     bytes_per_host = df.groupBy("client_ip").agg(F.sum("response_bytes").alias("total_bytes")).orderBy("total_bytes", ascending=False)
@@ -37,7 +37,7 @@ def build_queries(spark: SparkSession, parquet_path: str) -> dict:
     ).orderBy("error_rate", ascending=False)
 
     # 5) Distinct endpoints accessed per host
-    distinct_endpoints_per_host = df.groupBy("client_ip").agg(F.countDistinct("request_path").alias("distinct_endpoints")).orderBy("distinct_endpoints", ascending=False)
+    distinct_endpoints_per_host = df.groupBy("client_ip").agg(F.count_distinct("request_path").alias("distinct_endpoints")).orderBy("distinct_endpoints", ascending=False)
 
 
     return {

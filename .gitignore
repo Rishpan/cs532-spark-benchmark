@@ -9,3 +9,4 @@ build
 .env
 .DS_Store
 532-spark-bmark-linux
+pyrightconfig.json

@@ -14,7 +14,7 @@ from src.session import get_spark_session, load_env, require_env
 
 TOP_N = 10
 
-def build_queries(spark: SparkSession, parquet_path: str, view_name: str) -> str:
+def build_queries(spark: SparkSession, parquet_path: str, view_name: str) -> tuple:
     # First, read the parquet file into a temporary view
     read_parquet_into_tmpview(spark, parquet_path, view_name)
 
@@ -31,10 +31,10 @@ def build_queries(spark: SparkSession, parquet_path: str, view_name: str) -> str
 
     sql_query_daily = f"""
     SELECT
-        DATE(log_ts) AS day,
+        DATE(log_ts) AS date,
         COUNT(*) AS total_requests
     FROM {view_name}
-    GROUP BY day
+    GROUP BY date
     """
 
     hourly_metrics = spark.sql(sql_query_hourly)
@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     print("Total requests per day:")
     for r in sorted(res2, key=lambda x: -x['total_requests'])[:TOP_N]:
-        print(f"{r['day']}: requests={r['total_requests']}")
+        print(f"{r['date']}: requests={r['total_requests']}")
     
     print("\nHours by highest request volume:")
     for r in sorted(res1, key=lambda x: -x['total_requests'])[:TOP_N]:

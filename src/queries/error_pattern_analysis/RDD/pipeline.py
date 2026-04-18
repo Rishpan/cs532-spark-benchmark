@@ -13,28 +13,28 @@ from src.session import get_spark_session, load_env, require_env
 COLS = ["request_path", "status_code"]
 TOP_N = 10
 
-def build_queries(spark: SparkSession, parquet_path: str) -> dict:
+def build_queries(spark: SparkSession, parquet_path: str) -> tuple:
     rdd = read_parquet_into_rdd(spark, parquet_path, COLS).map(parse_row_to_tuple)
 
     total = rdd.count()
 
     # Map to ((endpoint, status_code), 1) for counting so key is (endpoint, status_code) and value is count of 1 for each error occurrence
     error_master_rdd = rdd.filter(lambda row: 400 <= row[1] < 600).map(
-        lambda row: ((row[0], row[1]), 1)).reduceByKey(
+        lambda row: ((row[0], row[1]), int(1))).reduceByKey(
         lambda a, b: a + b
     )
     
     # # 1) Top N error endpoints
     # Map to (endpoint, count for that (endpoint, status_code)) and then reduce by endpoint to get total count for each endpoint, 
     # then sort by count in descending order
-    top_endpoints = error_master_rdd.map(lambda x: (x[0][0], x[1])).reduceByKey(lambda a, b: a + b).sortBy(lambda x: -x[1])
+    top_endpoints = error_master_rdd.map(lambda x: (x[0][0], x[1])).reduceByKey(lambda a, b: a + b).sortBy(lambda x: -x[1])  # type: ignore[arg-type]
 
     # 2) Error frequencies by status code
     # Map to (status_code, count for that (endpoint, status_code)) and then reduce by status code to get total count for each status code, 
     # then sort by count in descending order. 
-    # Then map to (status_code, count, frequency) where frequency is count / total requests, and sort by frequency in descending order
     error_frequencies = error_master_rdd.map(lambda x: (x[0][1], x[1])).reduceByKey(lambda a, b: a + b)
-    error_freq_rate = error_frequencies.map(lambda x: (x[0], x[1], x[1] / total if total > 0 else 0)).sortBy(lambda x: -x[2])
+    # Then map to (status_code, count, frequency) where frequency is count / total requests, and sort by frequency in descending order
+    error_freq_rate = error_frequencies.map(lambda x: (x[0], x[1], x[1] / total if total > 0 else 0)).sortBy(lambda x: -x[2])  # type: ignore[arg-type]
 
     return top_endpoints, error_freq_rate
     
