@@ -1,0 +1,17 @@
+{
+  "query": "error_pattern_analysis",
+  "runs": [
+    {
+      "api": "RDD",
+      "elapsed_sec": 31.215
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 16.951
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 12.098
+    }
+  ]
+}

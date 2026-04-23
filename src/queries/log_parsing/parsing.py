@@ -35,7 +35,7 @@ def parse_combined_log_lines(lines: DataFrame) -> DataFrame:
     http_version = F.regexp_extract(request, r"(\S+)$", 1)
     path = F.regexp_extract(request, r"^\S+\s+(.+)\s+\S+$", 1)
 
-    log_ts = F.try_to_timestamp(ts_raw, F.lit("dd/MMM/yyyy:HH:mm:ss Z"))
+    log_ts = F.to_timestamp(ts_raw, "dd/MMM/yyyy:HH:mm:ss Z")
 
     return lines.select(
         v.alias("raw_line"),

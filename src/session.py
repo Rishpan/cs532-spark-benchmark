@@ -1,4 +1,4 @@
-"""Build SparkSession from repo-root `.env` (python-dotenv)."""
+"""Build SparkSession from a repo-root env file loaded via python-dotenv."""
 from __future__ import annotations
 
 import os
@@ -24,15 +24,18 @@ def _prepend_java_bin(java_home: str) -> None:
         os.environ["PATH"] = prefix + sep + path
 
 
-def load_env() -> None:
-    load_dotenv(repo_root() / ".env")
+def load_env(env_file: str = ".env") -> None:
+    # On Dataproc, --files distributes files to the job working directory (CWD).
+    # Locally, fall back to the repo root.
+    cwd_path = Path(env_file)
+    load_dotenv(cwd_path if cwd_path.exists() else repo_root() / env_file)
 
 
 def require_env(name: str) -> str:
     """Return env value. Variable must exist (empty string is allowed)."""
     if name not in os.environ:
         raise ValueError(
-            f"Environment variable {name} is not set. Define it in repo-root `.env`."
+            f"Environment variable {name} is not set. Define it in the repo-root env file."
         )
     return os.environ[name]
 
@@ -52,6 +55,7 @@ def get_spark_session() -> SparkSession:
         .config("spark.sql.session.timeZone", "UTC")
     )
     if java_opts:
+        os.environ["JAVA_TOOL_OPTIONS"] = java_opts
         b = b.config("spark.driver.extraJavaOptions", java_opts).config(
             "spark.executor.extraJavaOptions", java_opts
         )

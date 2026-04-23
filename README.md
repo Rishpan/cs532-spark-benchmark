@@ -58,6 +58,80 @@ To characterize performance, we will measure several systems-level metrics: wall
 - Determine the specific metrics for measuring system performance
 - Draft and submit the milestone check-in report
 
+## Running the Benchmark on GCP Dataproc
+
+The `Makefile` orchestrates the full pipeline: packaging source code, staging artifacts to GCS, provisioning a Dataproc cluster, running the log-parsing preprocessing job and the wall-clock benchmark job, fetching results back locally, and tearing down the cluster.
+
+### Prerequisites
+
+- `gcloud` CLI installed and authenticated (`gcloud auth login && gcloud auth application-default login`)
+- A GCP project with billing enabled
+- The uncompressed `access.log` dataset available locally (see **Run preprocessing pipeline** above for the download link)
+
+### One-time setup
+
+1. **Copy the Dataproc config template and fill in your values:**
+
+```bash
+cp .env.dataproc.example .env.dataproc
+# Edit .env.dataproc — set GCP_PROJECT, GCS_BUCKET, REGION, RAW_LOG_LOCAL, etc.
+```
+
+2. **Enable required GCP APIs** (Dataproc, Cloud Resource Manager):
+
+```bash
+make setup-services
+```
+
+3. **Grant the Dataproc Worker role** to the default Compute Engine service account:
+
+```bash
+make setup-iam
+```
+
+4. **Create the GCS bucket:**
+
+```bash
+make bucket-create
+```
+
+5. **Compress and upload the raw access log to GCS:**
+
+```bash
+make stage-raw-log
+```
+
+This compresses `access.log` to `staging/access.log.gz` locally (only if the source has changed), then uploads it to `gs://<GCS_BUCKET>/data/raw/access.log.gz`.
+
+### Run the pipeline
+
+Run each step in order:
+
+```bash
+make cluster-create       # provision the Dataproc cluster
+make job-log-parsing      # parse raw logs → Parquet in GCS
+make job-benchmark        # run RDD / DataFrame / SQL wall-clock benchmark
+make fetch-results        # copy results JSON to results/
+make cluster-delete       # tear down the cluster
+```
+
+Results are saved to **`results/error_pattern_wall_clock.json`**.
+
+Other useful targets:
+
+| Target | Description |
+|---|---|
+| `make bucket-delete` | Delete the GCS bucket and all its contents |
+| `make help` | Print all available targets and the prerequisite order |
+
+---
+
+## AI Usage
+
+This project used AI assistance (Claude via Cursor) to help design the implement the GCP Dataproc deployment pipeline, and debug compatibility issues across Spark, Java, and GCS. All AI-generated code was reviewed, tested, and integrated by the project team.
+
+---
+
 Citations
 [1] Dabbas, E. (n.d.). Web server access logs. Kaggle. https://www.kaggle.com/datasets/eliasdabbas/web-server-access-logs
 [2] Matei Zaharia, Mosharaf Chowdhury, Tathagata Das, Ankur Dave, Justin Ma, Murphy McCauly, Michael J. Franklin, Scott Shenker, & Ion Stoica (2012). Resilient Distributed Datasets: A Fault-Tolerant Abstraction for In-Memory Cluster Computing. In 9th USENIX Symposium on Networked Systems Design and Implementation (NSDI 12) (pp. 15–28). USENIX Association.
