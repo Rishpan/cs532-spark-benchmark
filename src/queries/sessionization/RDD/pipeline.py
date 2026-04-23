@@ -75,28 +75,28 @@ def run(spark: SparkSession, parquet_path: str, timeout: int = SESSION_TIMEOUT_S
     session_counts = (
         sessions_rdd
         .mapValues(len)
-        .sortBy(lambda x: -x[1])
+        .sortBy(lambda x: x[1])  # type: ignore[arg-type]
     )
 
     # 2) Average session duration per IP
     avg_duration = (
         sessions_rdd
         .mapValues(lambda s: sum(x["duration_secs"] for x in s) / len(s))
-        .sortBy(lambda x: -x[1])
+        .sortBy(lambda x: x[1])  # type: ignore[arg-type]
     )
 
     # 3) Average requests per session per IP
     avg_requests = (
         sessions_rdd
         .mapValues(lambda s: sum(x["request_count"] for x in s) / len(s))
-        .sortBy(lambda x: -x[1])
+        .sortBy(lambda x: x[1])  # type: ignore[arg-type]
     )
 
     # 4) Top 10 longest individual sessions (client_ip, duration_secs)
     flat_sessions = sessions_rdd.flatMap(
         lambda kv: [(kv[0], s["duration_secs"], s["request_count"]) for s in kv[1]]
     )
-    top_sessions = flat_sessions.sortBy(lambda x: -x[1]).take(10)
+    top_sessions = flat_sessions.sortBy(lambda x: x[1]).take(10)  # type: ignore[arg-type]
 
     return {
         "session_counts":  session_counts.collect(),
