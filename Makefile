@@ -11,15 +11,9 @@ GCS_RAW_LOG   := $(GCS_PREFIX)/data/raw/access.log.gz
 GCS_PARQUET   := $(GCS_PREFIX)/data/processed/access_logs
 GCS_RESULTS   := $(GCS_PREFIX)/results
 
-.PHONY: run-all setup-services setup-iam bucket-create bucket-delete cluster-create cluster-delete \
+.PHONY: setup-services setup-iam bucket-create bucket-delete cluster-create cluster-delete \
         job-log-parsing job-benchmark \
         stage-raw-log fetch-results help
-
-
-# ──────────────────────────────────────────────────────────────────────────────
-# run-all: full end-to-end pipeline
-# ──────────────────────────────────────────────────────────────────────────────
-run-all: .staged cluster-create job-log-parsing job-benchmark cluster-delete fetch-results
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Packaging — real file target, only re-zips when source files change
@@ -164,7 +158,6 @@ fetch-results:
 help:
 	@echo ""
 	@echo "Targets:"
-	@echo "  run-all                Full pipeline: stage → cluster → jobs → delete → fetch"
 	@echo "  setup-services         Enable required GCP APIs (once, before setup-iam)"
 	@echo "  setup-iam              Grant Dataproc Worker role to default service account (once)"
 	@echo "  bucket-create          Create GCS bucket if it does not already exist"
@@ -179,10 +172,13 @@ help:
 	@echo "  job-benchmark          Submit wall-clock benchmark job (error_pattern_analysis)"
 	@echo "  fetch-results          Copy benchmark JSON results back to results/"
 	@echo ""
-	@echo "Prerequisites:"
+	@echo "Prerequisites (one-time):"
 	@echo "  1. Copy .env.dataproc.example → .env.dataproc and fill in your values"
-	@echo "  2. Run 'make setup-services' once to enable required GCP APIs"
-	@echo "  3. Run 'make setup-iam' once to grant the Dataproc Worker role"
-	@echo "  4. Run 'make stage-raw-log' once to compress and upload the raw access.log"
-	@echo "  5. Run 'make run-all' (or individual targets) to execute the pipeline"
+	@echo "  2. make setup-services   — enable required GCP APIs"
+	@echo "  3. make setup-iam        — grant the Dataproc Worker role"
+	@echo "  4. make bucket-create    — create the GCS bucket"
+	@echo "  5. make stage-raw-log    — compress and upload access.log to GCS"
+	@echo ""
+	@echo "Pipeline (run in order):"
+	@echo "  make cluster-create → make job-log-parsing → make job-benchmark → make fetch-results → make cluster-delete"
 	@echo ""
