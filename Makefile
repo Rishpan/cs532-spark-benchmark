@@ -108,7 +108,7 @@ cluster-create:
 cluster-delete:
 	gcloud dataproc clusters delete $(CLUSTER_NAME) \
 	  --project=$(GCP_PROJECT) \
-	  --region=$(REGION) \
+	  --region=$(REGION)
 	@echo "[cluster] $(CLUSTER_NAME) deleted"
 
 # ──────────────────────────────────────────────────────────────────────────────
