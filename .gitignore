@@ -7,6 +7,9 @@ cs532-spark-benchmark
 skills-lock.json
 build
 .env
+.env.dataproc
+staging/
+.staged
 .DS_Store
 532-spark-bmark-linux
 pyrightconfig.json

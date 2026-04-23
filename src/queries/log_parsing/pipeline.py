@@ -22,22 +22,25 @@ from .parsing import parse_combined_log_lines, read_raw_log_lines
 def main() -> None:
     load_env()
 
-    raw_path   = Path(require_env("RAW_LOG_PATH"))
-    out_dir    = Path(require_env("OUTPUT_PARQUET_PATH"))
-    partitions = int(require_env("OUTPUT_PARTITIONS"))
-    by_date    = require_env("PARTITION_BY_LOG_DATE").lower() == "true"
-    strict     = require_env("STRICT_HTTP_METHOD").lower() == "true"
-    sample_pct = float(require_env("RAW_LOG_SAMPLE_PERCENT"))
-    sample_seed = int(require_env("RAW_LOG_SAMPLE_SEED"))
+    raw_path_str = require_env("RAW_LOG_PATH")
+    out_path_str = require_env("OUTPUT_PARQUET_PATH")
+    partitions   = int(require_env("OUTPUT_PARTITIONS"))
+    by_date      = require_env("PARTITION_BY_LOG_DATE").lower() == "true"
+    strict       = require_env("STRICT_HTTP_METHOD").lower() == "true"
+    sample_pct   = float(require_env("RAW_LOG_SAMPLE_PERCENT"))
+    sample_seed  = int(require_env("RAW_LOG_SAMPLE_SEED"))
 
-    if not raw_path.is_file():
-        print(f"ERROR: RAW_LOG_PATH not a file: {raw_path}", file=sys.stderr)
-        sys.exit(1)
-    out_dir.parent.mkdir(parents=True, exist_ok=True)
+    is_gcs = raw_path_str.startswith("gs://")
+    if not is_gcs:
+        raw_path = Path(raw_path_str)
+        if not raw_path.is_file():
+            print(f"ERROR: RAW_LOG_PATH not a file: {raw_path_str}", file=sys.stderr)
+            sys.exit(1)
+        Path(out_path_str).parent.mkdir(parents=True, exist_ok=True)
 
     spark = get_spark_session()
 
-    lines = read_raw_log_lines(spark, str(raw_path))
+    lines = read_raw_log_lines(spark, raw_path_str)
     if sample_pct < 100:
         lines = lines.sample(withReplacement=False, fraction=sample_pct / 100, seed=sample_seed)
         print(f"--- sampling ~{sample_pct}% (seed={sample_seed}) ---", flush=True)
@@ -57,13 +60,13 @@ def main() -> None:
     writer = cleaned.write.mode("overwrite").option("compression", "snappy")
     if by_date:
         writer = writer.partitionBy("log_date")
-    writer.parquet(str(out_dir))
+    writer.parquet(out_path_str)
 
     print(f"raw_lines={raw_n} regex_matched={matched_n} cleaned={cleaned_n}")
     if raw_n:
         print(f"parse_rate={cleaned_n / raw_n:.4f}  regex_match_rate={matched_n / raw_n:.4f}")
 
-    verify = spark.read.parquet(str(out_dir))
+    verify = spark.read.parquet(out_path_str)
     verify_n = verify.count()
     print(f"read_back={verify_n}")
     if verify_n == 0:
