@@ -1,4 +1,4 @@
-pyspark==3.3.*
+pyspark==3.5.*
 python-dotenv
 jupyter
 matplotlib

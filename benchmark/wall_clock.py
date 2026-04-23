@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from pyspark.sql import SparkSession
-from src.session import load_env
+from src.session import get_spark_session, load_env
 
 from src.queries.error_pattern_analysis.RDD.pipeline import (
     build_queries as rdd_build,
@@ -39,7 +39,8 @@ _VIEW_NAME = "zanbil_logs_view"
 
 
 def _parse_args() -> argparse.Namespace:
-    load_env(".env.dataproc")
+    load_env()             # loads .env (local master, JAVA_TOOL_OPTIONS, etc.)
+    load_env(".env.dataproc")  # overlays Dataproc paths if present
     parser = argparse.ArgumentParser(
         description="Wall-clock benchmark for error_pattern_analysis"
     )
@@ -107,7 +108,7 @@ def main() -> None:
             "--parquet-path is required (or set OUTPUT_PARQUET_PATH in .env.dataproc)"
         )
 
-    spark = SparkSession.builder.getOrCreate()
+    spark = get_spark_session()
     spark.sparkContext.setLogLevel("WARN")
 
     runs = [
