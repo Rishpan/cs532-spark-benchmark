@@ -53,6 +53,8 @@ def get_spark_session() -> SparkSession:
         .appName(app_name)
         .config("spark.sql.shuffle.partitions", shuffle)
         .config("spark.sql.session.timeZone", "UTC")
+        .config("spark.ui.retainedStages", 1000)
+        .config("spark.ui.retainedJobs", 1000) 
     )
     if java_opts:
         os.environ["JAVA_TOOL_OPTIONS"] = java_opts
