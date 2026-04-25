@@ -1,5 +1,5 @@
 """
-Stage/task benchmark for all queries across all three Spark APIs.
+Stage metrics benchmark for all queries across all three Spark APIs.
 
 Usage (local):
     python -m benchmark.stage_metrics \
@@ -182,11 +182,6 @@ def _stage_run_traffic_profiling_naive(
     metrics = _collect_stage_metrics(ui_url, app_id, pre)
     print(f"[stages] {label}: {metrics}", flush=True)
     return {"api": label, **metrics}
-
-
-# ---------------------------------------------------------------------------
-# Shared helpers (same as wall_clock.py)
-# ---------------------------------------------------------------------------
 
 def _parse_args() -> argparse.Namespace:
     load_env()
