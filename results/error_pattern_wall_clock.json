@@ -3,15 +3,15 @@
   "runs": [
     {
       "api": "RDD",
-      "elapsed_sec": 3.409
+      "elapsed_sec": 20.795
     },
     {
       "api": "DataFrame",
-      "elapsed_sec": 0.847
+      "elapsed_sec": 6.989
     },
     {
       "api": "SQL",
-      "elapsed_sec": 0.455
+      "elapsed_sec": 2.074
     }
   ]
 }

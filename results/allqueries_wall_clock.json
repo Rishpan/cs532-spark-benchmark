@@ -1,0 +1,58 @@
+{
+  "error_pattern_analysis": [
+    {
+      "api": "RDD",
+      "elapsed_sec": 18.749
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 6.239
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 1.899
+    }
+  ],
+  "temporal_aggregation": [
+    {
+      "api": "RDD",
+      "elapsed_sec": 3.469
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 1.935
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 0.978
+    }
+  ],
+  "perhost_traffic_profiling": [
+    {
+      "api": "RDD",
+      "elapsed_sec": 4.796
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 1.401
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 0.708
+    }
+  ],
+  "perhost_traffic_profiling_naive": [
+    {
+      "api": "RDD",
+      "elapsed_sec": 10.961
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 3.002
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 1.886
+    }
+  ]
+}

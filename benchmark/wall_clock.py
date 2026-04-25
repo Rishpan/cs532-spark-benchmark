@@ -35,6 +35,42 @@ from src.queries.error_pattern_analysis.SQL.pipeline import (
     build_queries as sql_build,
 )
 
+from src.queries.perhost_traffic_profiling.RDD.pipeline import (
+    build_queries as rdd_build_traffic,
+)
+
+from src.queries.perhost_traffic_profiling.SQL.pipeline import (
+    build_queries as sql_build_traffic,
+)
+
+from src.queries.perhost_traffic_profiling.DataFrame.pipeline import (
+    build_queries as df_build_traffic,
+)
+
+from src.queries.perhost_traffic_profiling.RDD.naive_pipeline import (
+    build_queries as rdd_build_traffic_naive,
+)
+
+from src.queries.perhost_traffic_profiling.SQL.naive_pipeline import (
+    build_queries as sql_build_traffic_naive,
+)
+
+from src.queries.perhost_traffic_profiling.DataFrame.naive_pipeline import (
+    build_queries as df_build_traffic_naive,
+)
+
+from src.queries.temporal_aggregation.RDD.pipeline import (
+    build_queries as rdd_build_temporal,
+)
+
+from src.queries.temporal_aggregation.SQL.pipeline import (
+    build_queries as sql_build_temporal,
+)
+
+from src.queries.temporal_aggregation.DataFrame.pipeline import (
+    build_queries as df_build_temporal,
+)
+
 _VIEW_NAME = "zanbil_logs_view"
 
 
@@ -57,23 +93,86 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def _time_run(label: str, spark: SparkSession, parquet_path: str) -> dict[str, Any]:
+def _time_run_error_pattern(label: str, spark: SparkSession, parquet_path: str) -> dict[str, Any]:
     """Run one API variant and return its wall-clock time in seconds."""
     print(f"[benchmark] starting {label} ...", flush=True)
     start = time.perf_counter()
 
     if label == "RDD":
         top_ep, err_freq = rdd_build(spark, parquet_path)
-        top_ep.collect()
-        err_freq.collect()
+        top_ep.count()
+        err_freq.count()
     elif label == "DataFrame":
         top_ep, err_freq = df_build(spark, parquet_path)
-        top_ep.collect()
-        err_freq.collect()
+        top_ep.count()
+        err_freq.count()
     elif label == "SQL":
         top_ep, err_freq = sql_build(spark, parquet_path, _VIEW_NAME)
-        top_ep.collect()
-        err_freq.collect()
+        top_ep.count()
+        err_freq.count()
+
+    elapsed = time.perf_counter() - start
+    print(f"[benchmark] {label} finished in {elapsed:.3f}s", flush=True)
+    return {"api": label, "elapsed_sec": round(elapsed, 3)}
+
+def _time_run_temporal_aggregation(label: str, spark: SparkSession, parquet_path: str) -> dict[str, Any]:
+    """Run one API variant and return its wall-clock time in seconds."""
+    print(f"[benchmark] starting {label} ...", flush=True)
+    start = time.perf_counter()
+
+    if label == "RDD":
+        metrics_per_hour, metrics_per_day = rdd_build_temporal(spark, parquet_path)
+        metrics_per_hour.count()
+        metrics_per_day.count()
+    elif label == "DataFrame":
+        metrics_per_hour, metrics_per_day = df_build_temporal(spark, parquet_path)
+        metrics_per_hour.count()
+        metrics_per_day.count()
+    elif label == "SQL":
+        metrics_per_hour, metrics_per_day = sql_build_temporal(spark, parquet_path, _VIEW_NAME)
+        metrics_per_hour.count()
+        metrics_per_day.count()
+
+    elapsed = time.perf_counter() - start
+    print(f"[benchmark] {label} finished in {elapsed:.3f}s", flush=True)
+    return {"api": label, "elapsed_sec": round(elapsed, 3)}
+
+def _time_run_traffic_profiling(label: str, spark: SparkSession, parquet_path: str) -> dict[str, Any]:
+    """Run one API variant and return its wall-clock time in seconds."""
+    print(f"[benchmark] starting {label} ...", flush=True)
+    start = time.perf_counter()
+
+    if label == "RDD":
+        metrics_per_host = rdd_build_traffic(spark, parquet_path)
+        metrics_per_host.count()
+    elif label == "DataFrame":
+        metrics_per_host = df_build_traffic(spark, parquet_path)
+        metrics_per_host.count()
+    elif label == "SQL":
+        metrics_per_host = sql_build_traffic(spark, parquet_path, _VIEW_NAME)
+        metrics_per_host.count()
+
+    elapsed = time.perf_counter() - start
+    print(f"[benchmark] {label} finished in {elapsed:.3f}s", flush=True)
+    return {"api": label, "elapsed_sec": round(elapsed, 3)}
+
+def _time_run_traffic_profiling_naive(label: str, spark: SparkSession, parquet_path: str) -> dict[str, Any]:
+    """Run one API variant and return its wall-clock time in seconds."""
+    print(f"[benchmark] starting {label} ...", flush=True)
+    start = time.perf_counter()
+
+    if label == "RDD":
+        out = rdd_build_traffic_naive(spark, parquet_path)
+        for res in out:
+            out[res].count()
+    elif label == "DataFrame":
+        out = df_build_traffic_naive(spark, parquet_path)
+        for res in out:
+            out[res].count()
+    elif label == "SQL":
+        out = sql_build_traffic_naive(spark, parquet_path, _VIEW_NAME)
+        for res in out:
+            out[res].count()
 
     elapsed = time.perf_counter() - start
     print(f"[benchmark] {label} finished in {elapsed:.3f}s", flush=True)
@@ -111,13 +210,38 @@ def main() -> None:
     spark = get_spark_session()
     spark.sparkContext.setLogLevel("WARN")
 
-    runs = [
-        _time_run("RDD", spark, args.parquet_path),
-        _time_run("DataFrame", spark, args.parquet_path),
-        _time_run("SQL", spark, args.parquet_path),
+    error_pattern_runs = [
+        _time_run_error_pattern("RDD", spark, args.parquet_path),
+        _time_run_error_pattern("DataFrame", spark, args.parquet_path),
+        _time_run_error_pattern("SQL", spark, args.parquet_path),
     ]
 
-    results = {"query": "error_pattern_analysis", "runs": runs}
+    temporal_aggregation_runs = [
+        _time_run_temporal_aggregation("RDD", spark, args.parquet_path),
+        _time_run_temporal_aggregation("DataFrame", spark, args.parquet_path),
+        _time_run_temporal_aggregation("SQL", spark, args.parquet_path),
+    ]
+
+    traffic_profiling_runs = [
+        _time_run_traffic_profiling("RDD", spark, args.parquet_path),
+        _time_run_traffic_profiling("DataFrame", spark, args.parquet_path),
+        _time_run_traffic_profiling("SQL", spark, args.parquet_path),
+    ]
+
+    traffic_profiling_naive_runs = [
+        _time_run_traffic_profiling_naive("RDD", spark, args.parquet_path),
+        _time_run_traffic_profiling_naive("DataFrame", spark, args.parquet_path),
+        _time_run_traffic_profiling_naive("SQL", spark, args.parquet_path),
+    ]
+
+    # TODO: Add timing for sessionization query
+
+    results = {
+        "error_pattern_analysis": error_pattern_runs,
+        "temporal_aggregation": temporal_aggregation_runs,
+        "perhost_traffic_profiling": traffic_profiling_runs,
+        "perhost_traffic_profiling_naive": traffic_profiling_naive_runs
+    }
     payload = json.dumps(results, indent=2)
     print(payload, flush=True)
 
