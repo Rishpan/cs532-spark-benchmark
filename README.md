@@ -1,5 +1,7 @@
 # A Comparative Analysis of PySpark's RDD, DataFrame, and SQL APIs on E-Commerce Web Server Logs
-Benchmarking PySpark's RDD, DataFrame, and SQL APIs on 3.3GB of e-commerce web server logs. Compares execution time, shuffle volume, stages/tasks, and memory usage across abstraction levels to analyze Spark's Catalyst optimizer.
+## Project Description and Relevance
+In this project, we aim to characterize the systems performance of batch-processing frameworks across different levels of abstraction. To achieve this goal, we will use the [Zanbil.ir E-commerce Web Server Access Logs dataset](https://www.kaggle.com/datasets/eliasdabbas/web-server-access-logs)[1] — approximately 10+ million requests totaling ~3.3 GB uncompressed (freely available on Kaggle). This dataset uses the Apache Combined Log Format, which contains the same core fields as the Common Log Format (host, timestamp, method, endpoint, status code, payload size) with two additional fields (Referer and User-Agent) that will be ignored during parsing. We will design a feature extraction pipeline consisting of several analytically meaningful queries — including log parsing, sessionization, per-host traffic profiling, error pattern analysis, and temporal aggregation — and implement each query three ways: using Spark's low-level RDD API, the DataFrame API, and Spark SQL. Right now, the plan for the project is to implement at least 4 out of 5 of these queries. The systems component of this project centers on understanding how Spark's query execution differs across these three abstraction levels, and why. The RDD API requires the programmer to manually manage data partitioning, join strategies, and caching, while the DataFrame and SQL interfaces delegate these decisions to Spark's Catalyst query optimizer. By implementing the same workload at all three levels, we can directly observe how Catalyst's automatic optimizations compare against hand-tuned RDD code. This connects directly to the course's coverage of the Spark execution model (Lecture 8), the RDD paper by Zaharia et al. [2], and the broader theme of evaluating system design tradeoffs.
+To characterize performance, we will measure several systems-level metrics: wall-clock execution time, shuffle read/write volume, number of stages and tasks, and peak memory usage. 
 
 Group Members: Atharva Kale, Gnaneswarudu Kuna, Kwame Afriyie Osei-Tutu, Rishab Pangal
 
@@ -55,28 +57,45 @@ Requires the Parquet data from the preprocessing pipeline above.
 From the **repository root**, with your venv activated:
 
 ```bash
-python -m benchmark.wall_clock
+python -m benchmark.wall_clock 
 ```
 
-This runs the `error_pattern_analysis` query using all three APIs (RDD, DataFrame, SQL) and writes wall-clock times to **`results/error_pattern_wall_clock.json`**. Paths are read from **`.env`** (`OUTPUT_PARQUET_PATH`, `RESULTS_PATH`) — override them on the command line if needed:
+This runs the all queries using all three APIs (RDD, DataFrame, SQL) and writes wall-clock times to **`results/allqueries_wall_clock.json`**. Paths are read from **`.env`** (`OUTPUT_PARQUET_PATH`, `RESULTS_PATH`) — override them on the command line if needed:
 
 ```bash
 python -m benchmark.wall_clock \
-    --parquet-path data/processed/access_logs \
-    --output-path results/error_pattern_wall_clock.json
+        --parquet-path data/processed/access_logs \
+        --output-path results/allqueries_wall_clock.json
 ```
 
-## Project Description and Relevance
-In this project, we aim to characterize the systems performance of batch-processing frameworks across different levels of abstraction. To achieve this goal, we will use the [Zanbil.ir E-commerce Web Server Access Logs dataset](https://www.kaggle.com/datasets/eliasdabbas/web-server-access-logs)[1] — approximately 10+ million requests totaling ~3.3 GB uncompressed (freely available on Kaggle). This dataset uses the Apache Combined Log Format, which contains the same core fields as the Common Log Format (host, timestamp, method, endpoint, status code, payload size) with two additional fields (Referer and User-Agent) that will be ignored during parsing. We will design a feature extraction pipeline consisting of several analytically meaningful queries — including log parsing, sessionization, per-host traffic profiling, error pattern analysis, and temporal aggregation — and implement each query three ways: using Spark's low-level RDD API, the DataFrame API, and Spark SQL. Right now, the plan for the project is to implement at least 4 out of 5 of these queries. The systems component of this project centers on understanding how Spark's query execution differs across these three abstraction levels, and why. The RDD API requires the programmer to manually manage data partitioning, join strategies, and caching, while the DataFrame and SQL interfaces delegate these decisions to Spark's Catalyst query optimizer. By implementing the same workload at all three levels, we can directly observe how Catalyst's automatic optimizations compare against hand-tuned RDD code. This connects directly to the course's coverage of the Spark execution model (Lecture 8), the RDD paper by Zaharia et al. [2], and the broader theme of evaluating system design tradeoffs.
-To characterize performance, we will measure several systems-level metrics: wall-clock execution time, shuffle read/write volume, number of stages and tasks, and peak memory usage. 
+To get all other metrics (fetched via /stages API endpoint), run:
+```bash
+python -m benchmark.stage_metrics
+```
+This runs the all queries using all three APIs (RDD, DataFrame, SQL) and writes all metrics to **`results/stage_metrics.json`**. Paths are read from **`.env`** (`OUTPUT_PARQUET_PATH`, `RESULTS_PATH`) — override them on the command line if needed:
+```bash
+python -m benchmark.stage_metrics \
+        --parquet-path data/processed/access_logs \
+        --output-path results/stage_metrics.json
+```
 
-## Mid-Project Goals, due by 4/15/2026 11:59 PM EST
+To get the plans for the different queries with Dataframe API and the lineages for the queries with the RDD API, run:
+```bash
+python -m benchmark.plans
+```
+This runs the all queries using all the RDD and DataFrame APIs and writes the plans/lineages to the **`results/plans`** directory. Paths are read from **`.env`** (`OUTPUT_PARQUET_PATH`, `RESULTS_PATH`) — override them on the command line if needed:
+```bash
+python -m benchmark.plans \
+        --parquet-path data/processed/access_logs \
+        --output-dir results/plans
+```
+<!-- ## Mid-Project Goals, due by 4/15/2026 11:59 PM EST
 - Set up shared GitHub repository and development environment (PySpark installed and tested on each member's machine)
 - Download and preprocess the Zanbil.ir E-commerce Web Server Access Logs dataset; verify it loads correctly in PySpark
 - Decide the cluster size (GCP/AWS)
 - Design the query workload and implement for one API type (Spark RDDs)
 - Determine the specific metrics for measuring system performance
-- Draft and submit the milestone check-in report
+- Draft and submit the milestone check-in report -->
 
 ## Running the Benchmark on GCP Dataproc
 
@@ -148,7 +167,13 @@ Other useful targets:
 
 ## AI Usage
 
-This project used AI assistance (Claude via Cursor) to help design the implement the GCP Dataproc deployment pipeline, and debug compatibility issues across Spark, Java, and GCS. All AI-generated code was reviewed, tested, and integrated by the project team.
+- This project used AI assistance (Claude via Cursor) to help design the implement the GCP Dataproc deployment pipeline, and debug compatibility issues across Spark, Java, and GCS. All AI-generated code was reviewed, tested, and integrated by the project team.
+
+- AI assistance was used to help think of the individual metrics to implement for each query type. 
+
+- AI assistance was used to help decide how to use the /stages API endpoint to fetch the desired system performance metrics
+
+- AI assistance was used to refactor the code such that it would work locally and on GCP (i.e. writing to a file)
 
 ---
 

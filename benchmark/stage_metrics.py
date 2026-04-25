@@ -4,7 +4,7 @@ Stage metrics benchmark for all queries across all three Spark APIs.
 Usage (local):
     python -m benchmark.stage_metrics \
         --parquet-path data/processed/access_logs \
-        --output-path results/stages.json
+        --output-path results/stage_metrics.json
 
 Usage (Dataproc):
     gcloud dataproc jobs submit pyspark gs://.../stages.py \
@@ -188,7 +188,7 @@ def _parse_args() -> argparse.Namespace:
     load_env(".env.dataproc")
     parser = argparse.ArgumentParser(description="Stage/task benchmark")
     parser.add_argument("--parquet-path", default=os.environ.get("OUTPUT_PARQUET_PATH", ""))
-    parser.add_argument("--output-path", default=os.environ.get("RESULTS_PATH", "results/stages.json"))
+    parser.add_argument("--output-path", default=os.environ.get("RESULTS_PATH", "results/stage_metrics.json"))
     return parser.parse_args()
 
 

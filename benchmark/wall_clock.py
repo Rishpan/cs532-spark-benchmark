@@ -4,7 +4,7 @@ Wall-clock benchmark for error_pattern_analysis across all three Spark APIs.
 Usage (local):
     python -m benchmark.wall_clock \
         --parquet-path data/processed/access_logs \
-        --output-path results/error_pattern_wall_clock.json
+        --output-path results/allqueries_wall_clock.json
 
 Usage (Dataproc — paths default to .env.dataproc values):
     gcloud dataproc jobs submit pyspark gs://.../wall_clock.py \
@@ -87,7 +87,7 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output-path",
-        default=os.environ.get("RESULTS_PATH", "results/error_pattern_wall_clock.json"),
+        default=os.environ.get("RESULTS_PATH", "results/allqueries_wall_clock.json"),
         help="Destination for the JSON results file (local or gs://)",
     )
     return parser.parse_args()
