@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import statistics
 import subprocess
 import tempfile
 from pathlib import Path
@@ -114,7 +115,7 @@ def _stage_run_error_pattern(
 
     # Must pass in pre to see which stages are new since the pre-run snapshot
     metrics = _collect_stage_metrics(ui_url, app_id, pre)
-    print(f"[stages] {label}: {metrics}", flush=True)
+    print(f"[stages] error_pattern_analysis/{label}: {metrics}", flush=True)
     return {"api": label, **metrics}
 
 
@@ -137,7 +138,7 @@ def _stage_run_temporal_aggregation(
 
     # Must pass in pre to see which stages are new since the pre-run snapshot
     metrics = _collect_stage_metrics(ui_url, app_id, pre)
-    print(f"[stages] {label}: {metrics}", flush=True)
+    print(f"[stages] temporal_aggregation/{label}: {metrics}", flush=True)
     return {"api": label, **metrics}
 
 
@@ -157,7 +158,7 @@ def _stage_run_traffic_profiling(
 
     # Must pass in pre to see which stages are new since the pre-run snapshot
     metrics = _collect_stage_metrics(ui_url, app_id, pre)
-    print(f"[stages] {label}: {metrics}", flush=True)
+    print(f"[stages] perhost_traffic_profiling/{label}: {metrics}", flush=True)
     return {"api": label, **metrics}
 
 
@@ -180,7 +181,7 @@ def _stage_run_traffic_profiling_naive(
 
     # Must pass in pre to see which stages are new since the pre-run snapshot
     metrics = _collect_stage_metrics(ui_url, app_id, pre)
-    print(f"[stages] {label}: {metrics}", flush=True)
+    print(f"[stages] perhost_traffic_profiling_naive/{label}: {metrics}", flush=True)
     return {"api": label, **metrics}
 
 def _parse_args() -> argparse.Namespace:
@@ -189,7 +190,67 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Stage/task benchmark")
     parser.add_argument("--parquet-path", default=os.environ.get("OUTPUT_PARQUET_PATH", ""))
     parser.add_argument("--output-path", default=os.environ.get("RESULTS_PATH", "results/stage_metrics.json"))
+    parser.add_argument(
+        "--num-runs",
+        type=int,
+        default=int(os.environ.get("STAGE_METRICS_NUM_RUNS", "1")),
+        help="Number of times to run each query/API variant (default: STAGE_METRICS_NUM_RUNS or 1)",
+    )
     return parser.parse_args()
+
+
+def _run_query_many(
+    query_name: str,
+    run_fn,
+    spark: SparkSession,
+    parquet_path: str,
+    ui_url: str,
+    app_id: str,
+    apis: list[str],
+    num_runs: int,
+) -> list[dict[str, Any]]:
+    """Run one query family across APIs for num_runs and return per-run records."""
+    records: list[dict[str, Any]] = []
+    for run in range(1, num_runs + 1):
+        for api in apis:
+            print(
+                f"[stages] run {run}/{num_runs} starting {query_name}/{api} ...",
+                flush=True,
+            )
+            entry = run_fn(api, spark, parquet_path, ui_url, app_id)
+            entry["run"] = run
+            records.append(entry)
+    return records
+
+
+def _summarize_stage_metrics(
+    records: list[dict[str, Any]],
+) -> dict[str, dict[str, float | int]]:
+    """Aggregate avg/std for all numeric stage metrics by API."""
+    metric_names = [
+        "num_stages",
+        "num_tasks",
+        "shuffle_read_bytes",
+        "shuffle_write_bytes",
+        "disk_bytes_spilled",
+        "executor_deserialize_time_sec",
+        "executor_cpu_time_sec",
+    ]
+    by_api: dict[str, list[dict[str, Any]]] = {}
+    for rec in records:
+        by_api.setdefault(str(rec["api"]), []).append(rec)
+
+    summary: dict[str, dict[str, float | int]] = {}
+    for api, api_records in by_api.items():
+        api_summary: dict[str, float | int] = {"num_runs": len(api_records)}
+        for metric in metric_names:
+            vals = [float(rec[metric]) for rec in api_records]
+            avg = statistics.fmean(vals)
+            std = statistics.pstdev(vals) if len(vals) > 1 else 0.0
+            api_summary[f"{metric}_avg"] = round(avg, 3)
+            api_summary[f"{metric}_std"] = round(std, 3)
+        summary[api] = api_summary
+    return summary
 
 
 def _write_results(content: str, output_path: str) -> None:
@@ -215,21 +276,72 @@ def main() -> None:
     args = _parse_args()
     if not args.parquet_path:
         raise ValueError("--parquet-path is required")
+    if args.num_runs < 1:
+        raise ValueError("--num-runs must be >= 1")
 
     spark = get_spark_session()
     spark.sparkContext.setLogLevel("WARN")
 
     ui_url = spark.sparkContext.uiWebUrl
+    if ui_url is None:
+        raise RuntimeError("Spark UI is disabled (spark.ui.enabled=false); stage metrics require it.")
     app_id = spark.sparkContext.applicationId
     print(f"[stages] Spark UI at {ui_url}, app_id={app_id}", flush=True)
 
     apis = ["RDD", "DataFrame", "SQL"]
 
+    error_pattern_runs = _run_query_many(
+        "error_pattern_analysis",
+        _stage_run_error_pattern,
+        spark,
+        args.parquet_path,
+        ui_url,
+        app_id,
+        apis,
+        args.num_runs,
+    )
+    temporal_aggregation_runs = _run_query_many(
+        "temporal_aggregation",
+        _stage_run_temporal_aggregation,
+        spark,
+        args.parquet_path,
+        ui_url,
+        app_id,
+        apis,
+        args.num_runs,
+    )
+    traffic_profiling_runs = _run_query_many(
+        "perhost_traffic_profiling",
+        _stage_run_traffic_profiling,
+        spark,
+        args.parquet_path,
+        ui_url,
+        app_id,
+        apis,
+        args.num_runs,
+    )
+    traffic_profiling_naive_runs = _run_query_many(
+        "perhost_traffic_profiling_naive",
+        _stage_run_traffic_profiling_naive,
+        spark,
+        args.parquet_path,
+        ui_url,
+        app_id,
+        apis,
+        args.num_runs,
+    )
+
     results = {
-        "error_pattern_analysis":        [_stage_run_error_pattern(a, spark, args.parquet_path, ui_url, app_id) for a in apis],
-        "temporal_aggregation":          [_stage_run_temporal_aggregation(a, spark, args.parquet_path, ui_url, app_id) for a in apis],
-        "perhost_traffic_profiling":     [_stage_run_traffic_profiling(a, spark, args.parquet_path, ui_url, app_id) for a in apis],
-        "perhost_traffic_profiling_naive":[_stage_run_traffic_profiling_naive(a, spark, args.parquet_path, ui_url, app_id) for a in apis],
+        "error_pattern_analysis": error_pattern_runs,
+        "temporal_aggregation": temporal_aggregation_runs,
+        "perhost_traffic_profiling": traffic_profiling_runs,
+        "perhost_traffic_profiling_naive": traffic_profiling_naive_runs,
+        "summary": {
+            "error_pattern_analysis": _summarize_stage_metrics(error_pattern_runs),
+            "temporal_aggregation": _summarize_stage_metrics(temporal_aggregation_runs),
+            "perhost_traffic_profiling": _summarize_stage_metrics(traffic_profiling_runs),
+            "perhost_traffic_profiling_naive": _summarize_stage_metrics(traffic_profiling_naive_runs),
+        },
     }
 
     payload = json.dumps(results, indent=2)

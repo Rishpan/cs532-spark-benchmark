@@ -12,7 +12,7 @@ GCS_PARQUET   := $(GCS_PREFIX)/data/processed/access_logs
 GCS_RESULTS   := $(GCS_PREFIX)/results
 
 .PHONY: setup-services setup-iam bucket-create bucket-delete cluster-create cluster-delete \
-        job-log-parsing job-benchmark \
+        job-log-parsing job-wall-clock job-stage-metrics job-plans \
         stage-raw-log fetch-results help
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -62,12 +62,15 @@ bucket-delete:
 # ──────────────────────────────────────────────────────────────────────────────
 # Staging — stamp file, only re-uploads when src.zip or dataproc scripts change
 # ──────────────────────────────────────────────────────────────────────────────
-.staged: bucket-create staging/src.zip dataproc/run_log_parsing.py dataproc/init-install.sh benchmark/wall_clock.py .env.dataproc
-	gcloud storage cp staging/src.zip             $(GCS_STAGING)/src.zip
-	gcloud storage cp dataproc/run_log_parsing.py $(GCS_STAGING)/run_log_parsing.py
-	gcloud storage cp dataproc/init-install.sh    $(GCS_STAGING)/init-install.sh
-	gcloud storage cp benchmark/wall_clock.py     $(GCS_STAGING)/wall_clock.py
-	gcloud storage cp .env.dataproc               $(GCS_STAGING)/.env.dataproc
+.staged: staging/src.zip dataproc/run_log_parsing.py dataproc/init-install.sh \
+         benchmark/wall_clock.py benchmark/stage_metrics.py benchmark/plans.py .env.dataproc
+	gcloud storage cp staging/src.zip              $(GCS_STAGING)/src.zip
+	gcloud storage cp dataproc/run_log_parsing.py  $(GCS_STAGING)/run_log_parsing.py
+	gcloud storage cp dataproc/init-install.sh     $(GCS_STAGING)/init-install.sh
+	gcloud storage cp benchmark/wall_clock.py      $(GCS_STAGING)/wall_clock.py
+	gcloud storage cp benchmark/stage_metrics.py   $(GCS_STAGING)/stage_metrics.py
+	gcloud storage cp benchmark/plans.py           $(GCS_STAGING)/plans.py
+	gcloud storage cp .env.dataproc                $(GCS_STAGING)/.env.dataproc
 	touch .staged
 	@echo "[stage] GCS staging artifacts are up to date"
 
@@ -89,7 +92,7 @@ stage-raw-log: bucket-create staging/access.log.gz
 # ──────────────────────────────────────────────────────────────────────────────
 # Cluster lifecycle
 # ──────────────────────────────────────────────────────────────────────────────
-cluster-create:
+cluster-create: .staged
 	gcloud dataproc clusters create $(CLUSTER_NAME) \
 	  --project=$(GCP_PROJECT) \
 	  --region=$(REGION) \
@@ -129,8 +132,8 @@ job-log-parsing: .staged
 	  --properties=spark.sql.shuffle.partitions=$(SPARK_SHUFFLE_PARTITIONS)
 	@echo "[job] log-parsing complete → $(GCS_PARQUET)"
 
-# Wall-clock benchmark: runs RDD / DataFrame / SQL variants of error_pattern_analysis.
-job-benchmark: .staged
+# Wall-clock benchmark: measures elapsed time for all queries across all three APIs.
+job-wall-clock: .staged
 	gcloud dataproc jobs submit pyspark \
 	  $(GCS_STAGING)/wall_clock.py \
 	  --cluster=$(CLUSTER_NAME) \
@@ -141,16 +144,50 @@ job-benchmark: .staged
 	  --properties=spark.sql.shuffle.partitions=$(SPARK_SHUFFLE_PARTITIONS) \
 	  -- \
 	  --parquet-path $(GCS_PARQUET) \
-	  --output-path $(RESULTS_PATH)
-	@echo "[job] benchmark complete → $(RESULTS_PATH)"
+	  --output-path $(GCS_RESULTS)/allqueries_wall_clock.json
+	@echo "[job] wall-clock benchmark complete → $(GCS_RESULTS)/allqueries_wall_clock.json"
+
+# Stage metrics benchmark: collects shuffle, spill, and task counts via the Spark /stages API.
+job-stage-metrics: .staged
+	gcloud dataproc jobs submit pyspark \
+	  $(GCS_STAGING)/stage_metrics.py \
+	  --cluster=$(CLUSTER_NAME) \
+	  --region=$(REGION) \
+	  --project=$(GCP_PROJECT) \
+	  --py-files=$(GCS_STAGING)/src.zip \
+	  --files=$(GCS_STAGING)/.env.dataproc \
+	  --properties=spark.sql.shuffle.partitions=$(SPARK_SHUFFLE_PARTITIONS) \
+	  -- \
+	  --parquet-path $(GCS_PARQUET) \
+	  --output-path $(GCS_RESULTS)/stage_metrics.json
+	@echo "[job] stage-metrics benchmark complete → $(GCS_RESULTS)/stage_metrics.json"
+
+# Plans benchmark: captures DataFrame query plans and RDD lineages for all queries.
+job-plans: .staged
+	gcloud dataproc jobs submit pyspark \
+	  $(GCS_STAGING)/plans.py \
+	  --cluster=$(CLUSTER_NAME) \
+	  --region=$(REGION) \
+	  --project=$(GCP_PROJECT) \
+	  --py-files=$(GCS_STAGING)/src.zip \
+	  --files=$(GCS_STAGING)/.env.dataproc \
+	  --properties=spark.sql.shuffle.partitions=$(SPARK_SHUFFLE_PARTITIONS) \
+	  -- \
+	  --parquet-path $(GCS_PARQUET) \
+	  --output-dir $(GCS_RESULTS)/plans
+	@echo "[job] plans benchmark complete → $(GCS_RESULTS)/plans"
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Fetch results back to local machine
 # ──────────────────────────────────────────────────────────────────────────────
 fetch-results:
-	mkdir -p results
-	gcloud storage cp $(RESULTS_PATH) results/error_pattern_wall_clock.json
-	@echo "[fetch] results saved to results/error_pattern_wall_clock.json"
+	mkdir -p results/plans
+	gcloud storage cp $(GCS_RESULTS)/allqueries_wall_clock.json results/allqueries_wall_clock.json 2>/dev/null \
+	  && echo "[fetch] allqueries_wall_clock.json saved" || echo "[fetch] allqueries_wall_clock.json not found, skipping"
+	gcloud storage cp $(GCS_RESULTS)/stage_metrics.json results/stage_metrics.json 2>/dev/null \
+	  && echo "[fetch] stage_metrics.json saved" || echo "[fetch] stage_metrics.json not found, skipping"
+	gcloud storage rsync -r $(GCS_RESULTS)/plans results/plans 2>/dev/null \
+	  && echo "[fetch] plans/ saved" || echo "[fetch] plans/ not found, skipping"
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Help
@@ -169,8 +206,11 @@ help:
 	@echo "  cluster-create         Provision Dataproc cluster"
 	@echo "  cluster-delete         Tear down Dataproc cluster"
 	@echo "  job-log-parsing        Submit log-parsing preprocessing job"
-	@echo "  job-benchmark          Submit wall-clock benchmark job (error_pattern_analysis)"
-	@echo "  fetch-results          Copy benchmark JSON results back to results/"
+	@echo "  job-wall-clock         Submit wall-clock benchmark job (all queries, all APIs)"
+	@echo "  job-stage-metrics      Submit stage-metrics benchmark job (shuffle/spill/task counts)"
+	@echo "  job-plans              Submit plans benchmark job (DataFrame plans + RDD lineages)"
+	@echo "  fetch-results          Copy all benchmark results back to results/"
+	@echo "                         Benchmark repeat counts: WALL_CLOCK_NUM_RUNS, STAGE_METRICS_NUM_RUNS"
 	@echo ""
 	@echo "Prerequisites (one-time):"
 	@echo "  1. Copy .env.dataproc.example → .env.dataproc and fill in your values"
@@ -180,5 +220,5 @@ help:
 	@echo "  5. make stage-raw-log    — compress and upload access.log to GCS"
 	@echo ""
 	@echo "Pipeline (run in order):"
-	@echo "  make cluster-create → make job-log-parsing → make job-benchmark → make fetch-results → make cluster-delete"
+	@echo "  make cluster-create → make job-log-parsing → make job-wall-clock / job-stage-metrics / job-plans → make fetch-results → make cluster-delete"
 	@echo ""

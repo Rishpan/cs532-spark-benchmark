@@ -69,12 +69,14 @@ def _run_and_capture_plans_traffic_profiling(
     """
     Run the specified query and capture its execution plan.
     """
+    print(f"[plans] starting perhost_traffic_profiling/{label} ...", flush=True)
     if label == "DataFrame":
         traffic_profiling_df = df_build_traffic(spark, parquet_path)
         _capture_df_plan(traffic_profiling_df, "traffic_profiling", output_dir)
     elif label == "RDD":
         traffic_profiling_rdd = rdd_build_traffic(spark, parquet_path)
         _capture_rdd_lineage(traffic_profiling_rdd, "traffic_profiling", output_dir)
+    print(f"[plans] finished perhost_traffic_profiling/{label}", flush=True)
 
     
 
@@ -85,12 +87,14 @@ def _run_and_capture_plans_temporal_aggregation(
     output_dir: str,
 ):
     """ I choice metrics_per_hour DF/RDD because it has more transformations and shuffles"""
+    print(f"[plans] starting temporal_aggregation/{label} ...", flush=True)
     if label == "DataFrame":
         metrics_per_hour_df, _ = df_build_temporal(spark, parquet_path)
         _capture_df_plan(metrics_per_hour_df, "temporal_agg", output_dir)
     elif label == "RDD":
         metrics_per_hour_rdd, _ = rdd_build_temporal(spark, parquet_path)
         _capture_rdd_lineage(metrics_per_hour_rdd, "temporal_agg", output_dir)
+    print(f"[plans] finished temporal_aggregation/{label}", flush=True)
 
 
 def _run_and_capture_plans_error_pattern_analysis(
@@ -100,12 +104,14 @@ def _run_and_capture_plans_error_pattern_analysis(
     output_dir: str,
 ): 
     """ I choose top_endpoints DF/RDD because it has more transformations and shuffles"""
+    print(f"[plans] starting error_pattern_analysis/{label} ...", flush=True)
     if label == "DataFrame":
         top_endpoints_df, _ = df_build(spark, parquet_path)
         _capture_df_plan(top_endpoints_df, "error_pattern", output_dir)
     elif label == "RDD":
         top_endpoints_rdd, _ = rdd_build(spark, parquet_path)
         _capture_rdd_lineage(top_endpoints_rdd, "error_pattern", output_dir)
+    print(f"[plans] finished error_pattern_analysis/{label}", flush=True)
 
 def _parse_args() -> argparse.Namespace:
     load_env()

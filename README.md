@@ -68,6 +68,12 @@ python -m benchmark.wall_clock \
         --output-path results/allqueries_wall_clock.json
 ```
 
+By default, wall-clock runs each query/API once. Set `WALL_CLOCK_NUM_RUNS` in `.env`/`.env.dataproc`, or override with:
+```bash
+python -m benchmark.wall_clock --num-runs 5
+```
+Output now includes per-run rows (`run` index) and a `summary` block with `avg_elapsed_sec` and `std_elapsed_sec` per API.
+
 To get all other metrics (fetched via /stages API endpoint), run:
 ```bash
 python -m benchmark.stage_metrics
@@ -78,6 +84,12 @@ python -m benchmark.stage_metrics \
         --parquet-path data/processed/access_logs \
         --output-path results/stage_metrics.json
 ```
+
+By default, stage-metrics runs each query/API once. Set `STAGE_METRICS_NUM_RUNS` in `.env`/`.env.dataproc`, or override with:
+```bash
+python -m benchmark.stage_metrics --num-runs 5
+```
+Output now includes per-run rows (`run` index) and a `summary` block with per-metric avg/std per API.
 
 To get the plans for the different queries with Dataframe API and the lineages for the queries with the RDD API, run:
 ```bash
@@ -149,12 +161,14 @@ Run each step in order:
 ```bash
 make cluster-create       # provision the Dataproc cluster
 make job-log-parsing      # parse raw logs → Parquet in GCS
-make job-benchmark        # run RDD / DataFrame / SQL wall-clock benchmark
-make fetch-results        # copy results JSON to results/
+make job-wall-clock       # run RDD / DataFrame / SQL wall-clock benchmark
+make job-stage-metrics    # collect shuffle / spill / task-count metrics
+make job-plans            # capture DataFrame query plans and RDD lineages
+make fetch-results        # copy results to results/ (skips any not yet run)
 make cluster-delete       # tear down the cluster
 ```
 
-Results are saved to **`results/error_pattern_wall_clock.json`**.
+Results are saved under **`results/`** (for example `allqueries_wall_clock.json`, `stage_metrics.json`, and `plans/`).
 
 Other useful targets:
 

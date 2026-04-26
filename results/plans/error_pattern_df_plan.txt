@@ -1,31 +1,31 @@
 == Parsed Logical Plan ==
 'Sort ['count DESC NULLS LAST], true
-+- Aggregate [request_path#3], [request_path#3, count(1) AS count#21L]
++- Aggregate [request_path#3], [request_path#3, count(1) AS count#39L]
    +- Filter ((status_code#5 >= 400) AND (status_code#5 < 600))
       +- Relation [client_ip#0,log_ts#1,http_method#2,request_path#3,http_version#4,status_code#5,response_bytes#6L,log_date#7] parquet
 
 == Analyzed Logical Plan ==
 request_path: string, count: bigint
-Sort [count#21L DESC NULLS LAST], true
-+- Aggregate [request_path#3], [request_path#3, count(1) AS count#21L]
+Sort [count#39L DESC NULLS LAST], true
++- Aggregate [request_path#3], [request_path#3, count(1) AS count#39L]
    +- Filter ((status_code#5 >= 400) AND (status_code#5 < 600))
       +- Relation [client_ip#0,log_ts#1,http_method#2,request_path#3,http_version#4,status_code#5,response_bytes#6L,log_date#7] parquet
 
 == Optimized Logical Plan ==
-Sort [count#21L DESC NULLS LAST], true
-+- Aggregate [request_path#3], [request_path#3, count(1) AS count#21L]
+Sort [count#39L DESC NULLS LAST], true
++- Aggregate [request_path#3], [request_path#3, count(1) AS count#39L]
    +- Project [request_path#3]
       +- Filter (isnotnull(status_code#5) AND ((status_code#5 >= 400) AND (status_code#5 < 600)))
          +- Relation [client_ip#0,log_ts#1,http_method#2,request_path#3,http_version#4,status_code#5,response_bytes#6L,log_date#7] parquet
 
 == Physical Plan ==
 AdaptiveSparkPlan isFinalPlan=false
-+- Sort [count#21L DESC NULLS LAST], true, 0
-   +- Exchange rangepartitioning(count#21L DESC NULLS LAST, 12), ENSURE_REQUIREMENTS, [plan_id=58]
-      +- HashAggregate(keys=[request_path#3], functions=[count(1)], output=[request_path#3, count#21L])
-         +- Exchange hashpartitioning(request_path#3, 12), ENSURE_REQUIREMENTS, [plan_id=55]
-            +- HashAggregate(keys=[request_path#3], functions=[partial_count(1)], output=[request_path#3, count#43L])
++- Sort [count#39L DESC NULLS LAST], true, 0
+   +- Exchange rangepartitioning(count#39L DESC NULLS LAST, 100), ENSURE_REQUIREMENTS, [plan_id=65]
+      +- HashAggregate(keys=[request_path#3], functions=[count(1)], output=[request_path#3, count#39L])
+         +- Exchange hashpartitioning(request_path#3, 100), ENSURE_REQUIREMENTS, [plan_id=62]
+            +- HashAggregate(keys=[request_path#3], functions=[partial_count(1)], output=[request_path#3, count#59L])
                +- Project [request_path#3]
                   +- Filter ((isnotnull(status_code#5) AND (status_code#5 >= 400)) AND (status_code#5 < 600))
-                     +- FileScan parquet [request_path#3,status_code#5] Batched: true, DataFilters: [isnotnull(status_code#5), (status_code#5 >= 400), (status_code#5 < 600)], Format: Parquet, Location: InMemoryFileIndex(1 paths)[file:/mnt/c/Users/risha/OneDrive/Desktop/CS532/cs532-spark-benchmark/d..., PartitionFilters: [], PushedFilters: [IsNotNull(status_code), GreaterThanOrEqual(status_code,400), LessThan(status_code,600)], ReadSchema: struct<request_path:string,status_code:int>
+                     +- FileScan parquet [request_path#3,status_code#5,log_date#7] Batched: true, DataFilters: [isnotnull(status_code#5), (status_code#5 >= 400), (status_code#5 < 600)], Format: Parquet, Location: InMemoryFileIndex(1 paths)[gs://my-cs532-bucket/data/processed/access_logs], PartitionFilters: [], PushedFilters: [IsNotNull(status_code), GreaterThanOrEqual(status_code,400), LessThan(status_code,600)], ReadSchema: struct<request_path:string,status_code:int>
 

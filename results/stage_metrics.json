@@ -4,31 +4,31 @@
       "api": "RDD",
       "num_stages": 22,
       "num_tasks": 85,
-      "shuffle_read_bytes": 1281492,
-      "shuffle_write_bytes": 641838,
+      "shuffle_read_bytes": 1315635,
+      "shuffle_write_bytes": 657183,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.402,
-      "executor_cpu_time_sec": 5.780142825
+      "executor_deserialize_time_sec": 5.387,
+      "executor_cpu_time_sec": 3.344107284
     },
     {
       "api": "DataFrame",
       "num_stages": 16,
       "num_tasks": 40,
-      "shuffle_read_bytes": 255949,
-      "shuffle_write_bytes": 255949,
+      "shuffle_read_bytes": 456625,
+      "shuffle_write_bytes": 456625,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.104,
-      "executor_cpu_time_sec": 1.421052427
+      "executor_deserialize_time_sec": 1.027,
+      "executor_cpu_time_sec": 5.559128865
     },
     {
       "api": "SQL",
       "num_stages": 16,
       "num_tasks": 40,
-      "shuffle_read_bytes": 255949,
-      "shuffle_write_bytes": 255949,
+      "shuffle_read_bytes": 456625,
+      "shuffle_write_bytes": 456625,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.061,
-      "executor_cpu_time_sec": 0.656323273
+      "executor_deserialize_time_sec": 0.319,
+      "executor_cpu_time_sec": 3.499664797
     }
   ],
   "temporal_aggregation": [
@@ -36,31 +36,31 @@
       "api": "RDD",
       "num_stages": 5,
       "num_tasks": 17,
-      "shuffle_read_bytes": 1901,
-      "shuffle_write_bytes": 1901,
+      "shuffle_read_bytes": 3215,
+      "shuffle_write_bytes": 3215,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.055,
-      "executor_cpu_time_sec": 2.467336047
+      "executor_deserialize_time_sec": 0.251,
+      "executor_cpu_time_sec": 0.232140645
     },
     {
       "api": "DataFrame",
       "num_stages": 13,
       "num_tasks": 31,
-      "shuffle_read_bytes": 1996,
-      "shuffle_write_bytes": 1996,
+      "shuffle_read_bytes": 5675,
+      "shuffle_write_bytes": 5675,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.04,
-      "executor_cpu_time_sec": 0.604723835
+      "executor_deserialize_time_sec": 0.401,
+      "executor_cpu_time_sec": 2.323304815
     },
     {
       "api": "SQL",
       "num_stages": 13,
       "num_tasks": 31,
-      "shuffle_read_bytes": 1996,
-      "shuffle_write_bytes": 1996,
+      "shuffle_read_bytes": 5675,
+      "shuffle_write_bytes": 5675,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.034,
-      "executor_cpu_time_sec": 0.283277322
+      "executor_deserialize_time_sec": 0.184,
+      "executor_cpu_time_sec": 1.963312816
     }
   ],
   "perhost_traffic_profiling": [
@@ -68,31 +68,31 @@
       "api": "RDD",
       "num_stages": 3,
       "num_tasks": 9,
-      "shuffle_read_bytes": 12194186,
-      "shuffle_write_bytes": 12194186,
+      "shuffle_read_bytes": 11952409,
+      "shuffle_write_bytes": 11952409,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.019,
-      "executor_cpu_time_sec": 2.412058965
+      "executor_deserialize_time_sec": 0.113,
+      "executor_cpu_time_sec": 0.381950061
     },
     {
       "api": "DataFrame",
       "num_stages": 7,
       "num_tasks": 18,
-      "shuffle_read_bytes": 2292031,
-      "shuffle_write_bytes": 2292031,
+      "shuffle_read_bytes": 2210464,
+      "shuffle_write_bytes": 2210464,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.046,
-      "executor_cpu_time_sec": 1.592185857
+      "executor_deserialize_time_sec": 0.096,
+      "executor_cpu_time_sec": 1.645907102
     },
     {
       "api": "SQL",
       "num_stages": 7,
       "num_tasks": 18,
-      "shuffle_read_bytes": 2292031,
-      "shuffle_write_bytes": 2292031,
+      "shuffle_read_bytes": 2210464,
+      "shuffle_write_bytes": 2210464,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.035,
-      "executor_cpu_time_sec": 0.598341446
+      "executor_deserialize_time_sec": 0.111,
+      "executor_cpu_time_sec": 1.306552944
     }
   ],
   "perhost_traffic_profiling_naive": [
@@ -100,31 +100,31 @@
       "api": "RDD",
       "num_stages": 14,
       "num_tasks": 53,
-      "shuffle_read_bytes": 28735032,
-      "shuffle_write_bytes": 22814582,
+      "shuffle_read_bytes": 28531154,
+      "shuffle_write_bytes": 23048252,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.089,
-      "executor_cpu_time_sec": 9.072071274
+      "executor_deserialize_time_sec": 0.496,
+      "executor_cpu_time_sec": 0.781819755
     },
     {
       "api": "DataFrame",
       "num_stages": 31,
       "num_tasks": 86,
-      "shuffle_read_bytes": 11460155,
-      "shuffle_write_bytes": 11460155,
+      "shuffle_read_bytes": 11052320,
+      "shuffle_write_bytes": 11052320,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.076,
-      "executor_cpu_time_sec": 1.774466239
+      "executor_deserialize_time_sec": 0.42,
+      "executor_cpu_time_sec": 5.941729134
     },
     {
       "api": "SQL",
       "num_stages": 31,
       "num_tasks": 86,
-      "shuffle_read_bytes": 11460155,
-      "shuffle_write_bytes": 11460155,
+      "shuffle_read_bytes": 11052320,
+      "shuffle_write_bytes": 11052320,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.079,
-      "executor_cpu_time_sec": 1.818049282
+      "executor_deserialize_time_sec": 0.413,
+      "executor_cpu_time_sec": 5.691458687
     }
   ]
 }

@@ -1,24 +1,25 @@
 == Parsed Logical Plan ==
-'Aggregate ['client_ip], ['client_ip, 'count(*) AS total_requests#101, 'sum('response_bytes) AS total_bytes#102, 'avg('response_bytes) AS average_bytes#103, '`*`('`/`('sum(CASE WHEN '`>=`('status_code, 400) THEN 1 ELSE 0 END), 'count(*)), 100) AS error_rate#104, 'count(distinct 'request_path) AS distinct_endpoints#105]
-+- Relation [client_ip#93,log_ts#94,http_method#95,request_path#96,http_version#97,status_code#98,response_bytes#99L,log_date#100] parquet
+'Aggregate ['client_ip], ['client_ip, count(1) AS total_requests#149L, sum('response_bytes) AS total_bytes#151, avg('response_bytes) AS average_bytes#153, ((sum(CASE WHEN ('status_code >= 400) THEN 1 ELSE 0 END) / count(1)) * 100) AS error_rate#156, 'count(distinct 'request_path) AS distinct_endpoints#157]
++- Relation [client_ip#124,log_ts#125,http_method#126,request_path#127,http_version#128,status_code#129,response_bytes#130L,log_date#131] parquet
 
 == Analyzed Logical Plan ==
 client_ip: string, total_requests: bigint, total_bytes: bigint, average_bytes: double, error_rate: double, distinct_endpoints: bigint
-Aggregate [client_ip#93], [client_ip#93, count(1) AS total_requests#101L, sum(response_bytes#99L) AS total_bytes#102L, avg(response_bytes#99L) AS average_bytes#103, ((cast(sum(CASE WHEN (status_code#98 >= 400) THEN 1 ELSE 0 END) as double) / cast(count(1) as double)) * cast(100 as double)) AS error_rate#104, count(distinct request_path#96) AS distinct_endpoints#105L]
-+- Relation [client_ip#93,log_ts#94,http_method#95,request_path#96,http_version#97,status_code#98,response_bytes#99L,log_date#100] parquet
+Aggregate [client_ip#124], [client_ip#124, count(1) AS total_requests#149L, sum(response_bytes#130L) AS total_bytes#151L, avg(response_bytes#130L) AS average_bytes#153, ((cast(sum(CASE WHEN (status_code#129 >= 400) THEN 1 ELSE 0 END) as double) / cast(count(1) as double)) * cast(100 as double)) AS error_rate#156, count(distinct request_path#127) AS distinct_endpoints#157L]
++- Relation [client_ip#124,log_ts#125,http_method#126,request_path#127,http_version#128,status_code#129,response_bytes#130L,log_date#131] parquet
 
 == Optimized Logical Plan ==
-Aggregate [client_ip#93], [client_ip#93, count(1) AS total_requests#101L, sum(response_bytes#99L) AS total_bytes#102L, avg(response_bytes#99L) AS average_bytes#103, ((cast(sum(CASE WHEN (status_code#98 >= 400) THEN 1 ELSE 0 END) as double) / cast(count(1) as double)) * 100.0) AS error_rate#104, count(distinct request_path#96) AS distinct_endpoints#105L]
-+- Project [client_ip#93, request_path#96, status_code#98, response_bytes#99L]
-   +- Relation [client_ip#93,log_ts#94,http_method#95,request_path#96,http_version#97,status_code#98,response_bytes#99L,log_date#100] parquet
+Aggregate [client_ip#124], [client_ip#124, count(1) AS total_requests#149L, sum(response_bytes#130L) AS total_bytes#151L, avg(response_bytes#130L) AS average_bytes#153, ((cast(sum(CASE WHEN (status_code#129 >= 400) THEN 1 ELSE 0 END) as double) / cast(count(1) as double)) * 100.0) AS error_rate#156, count(distinct request_path#127) AS distinct_endpoints#157L]
++- Project [client_ip#124, request_path#127, status_code#129, response_bytes#130L]
+   +- Relation [client_ip#124,log_ts#125,http_method#126,request_path#127,http_version#128,status_code#129,response_bytes#130L,log_date#131] parquet
 
 == Physical Plan ==
 AdaptiveSparkPlan isFinalPlan=false
-+- HashAggregate(keys=[client_ip#93], functions=[count(1), sum(response_bytes#99L), avg(response_bytes#99L), sum(CASE WHEN (status_code#98 >= 400) THEN 1 ELSE 0 END), count(distinct request_path#96)], output=[client_ip#93, total_requests#101L, total_bytes#102L, average_bytes#103, error_rate#104, distinct_endpoints#105L])
-   +- Exchange hashpartitioning(client_ip#93, 12), ENSURE_REQUIREMENTS, [plan_id=96]
-      +- HashAggregate(keys=[client_ip#93], functions=[merge_count(1), merge_sum(response_bytes#99L), merge_avg(response_bytes#99L), merge_sum(CASE WHEN (status_code#98 >= 400) THEN 1 ELSE 0 END), partial_count(distinct request_path#96)], output=[client_ip#93, count#122L, sum#124L, sum#127, count#128L, sum#130L, count#133L])
-         +- HashAggregate(keys=[client_ip#93, request_path#96], functions=[merge_count(1), merge_sum(response_bytes#99L), merge_avg(response_bytes#99L), merge_sum(CASE WHEN (status_code#98 >= 400) THEN 1 ELSE 0 END)], output=[client_ip#93, request_path#96, count#122L, sum#124L, sum#127, count#128L, sum#130L])
-            +- Exchange hashpartitioning(client_ip#93, request_path#96, 12), ENSURE_REQUIREMENTS, [plan_id=92]
-               +- HashAggregate(keys=[client_ip#93, request_path#96], functions=[partial_count(1), partial_sum(response_bytes#99L), partial_avg(response_bytes#99L), partial_sum(CASE WHEN (status_code#98 >= 400) THEN 1 ELSE 0 END)], output=[client_ip#93, request_path#96, count#122L, sum#124L, sum#127, count#128L, sum#130L])
-                  +- FileScan parquet [client_ip#93,request_path#96,status_code#98,response_bytes#99L] Batched: true, DataFilters: [], Format: Parquet, Location: InMemoryFileIndex(1 paths)[file:/mnt/c/Users/risha/OneDrive/Desktop/CS532/cs532-spark-benchmark/d..., PartitionFilters: [], PushedFilters: [], ReadSchema: struct<client_ip:string,request_path:string,status_code:int,response_bytes:bigint>
++- HashAggregate(keys=[client_ip#124], functions=[count(1), sum(response_bytes#130L), avg(response_bytes#130L), sum(CASE WHEN (status_code#129 >= 400) THEN 1 ELSE 0 END), count(distinct request_path#127)], output=[client_ip#124, total_requests#149L, total_bytes#151L, average_bytes#153, error_rate#156, distinct_endpoints#157L])
+   +- Exchange hashpartitioning(client_ip#124, 100), ENSURE_REQUIREMENTS, [plan_id=105]
+      +- HashAggregate(keys=[client_ip#124], functions=[merge_count(1), merge_sum(response_bytes#130L), merge_avg(response_bytes#130L), merge_sum(CASE WHEN (status_code#129 >= 400) THEN 1 ELSE 0 END), partial_count(distinct request_path#127)], output=[client_ip#124, count#167L, sum#169L, sum#172, count#173L, sum#175L, count#178L])
+         +- HashAggregate(keys=[client_ip#124, request_path#127], functions=[merge_count(1), merge_sum(response_bytes#130L), merge_avg(response_bytes#130L), merge_sum(CASE WHEN (status_code#129 >= 400) THEN 1 ELSE 0 END)], output=[client_ip#124, request_path#127, count#167L, sum#169L, sum#172, count#173L, sum#175L])
+            +- Exchange hashpartitioning(client_ip#124, request_path#127, 100), ENSURE_REQUIREMENTS, [plan_id=101]
+               +- HashAggregate(keys=[client_ip#124, request_path#127], functions=[partial_count(1), partial_sum(response_bytes#130L), partial_avg(response_bytes#130L), partial_sum(CASE WHEN (status_code#129 >= 400) THEN 1 ELSE 0 END)], output=[client_ip#124, request_path#127, count#167L, sum#169L, sum#172, count#173L, sum#175L])
+                  +- Project [client_ip#124, request_path#127, status_code#129, response_bytes#130L]
+                     +- FileScan parquet [client_ip#124,request_path#127,status_code#129,response_bytes#130L,log_date#131] Batched: true, DataFilters: [], Format: Parquet, Location: InMemoryFileIndex(1 paths)[gs://my-cs532-bucket/data/processed/access_logs], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<client_ip:string,request_path:string,status_code:int,response_bytes:bigint>
 
