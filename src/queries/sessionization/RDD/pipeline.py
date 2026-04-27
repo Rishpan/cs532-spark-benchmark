@@ -60,7 +60,7 @@ def build_queries(spark: SparkSession, parquet_path: str, timeout: int = SESSION
     rdd = read_parquet_into_rdd(spark, parquet_path, COLS)
 
     # (client_ip, log_ts)
-    pairs = rdd.map(lambda row: (row[0], row[1]))
+    pairs = rdd.map(lambda row: (row[0], datetime.fromtimestamp(row[1])))
 
     # Group all timestamps per IP, then assign sessions
     # sessions_rdd: (client_ip, [session_dict, ...])

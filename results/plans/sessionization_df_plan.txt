@@ -1,0 +1,52 @@
+== Parsed Logical Plan ==
+'Aggregate ['client_ip, 'session_id], ['client_ip, 'session_id, 'count(*) AS request_count#149, '`-`('unix_timestamp('max('log_ts), yyyy-MM-dd HH:mm:ss), 'unix_timestamp('min('log_ts), yyyy-MM-dd HH:mm:ss)) AS duration_secs#150]
++- Project [client_ip#135, log_ts#136, prev_ts#144, gap_secs#145L, is_new_session#146, session_id#147L]
+   +- Project [client_ip#135, log_ts#136, prev_ts#144, gap_secs#145L, is_new_session#146, session_id#147L, session_id#147L]
+      +- Window [sum(is_new_session#146) windowspecdefinition(client_ip#135, log_ts#136 ASC NULLS FIRST, specifiedwindowframe(RowFrame, unboundedpreceding$(), currentrow$())) AS session_id#147L], [client_ip#135], [log_ts#136 ASC NULLS FIRST]
+         +- Project [client_ip#135, log_ts#136, prev_ts#144, gap_secs#145L, is_new_session#146]
+            +- Project [client_ip#135, log_ts#136, prev_ts#144, gap_secs#145L, CASE WHEN (isnull(prev_ts#144) OR (gap_secs#145L > cast(1800 as bigint))) THEN 1 ELSE 0 END AS is_new_session#146]
+               +- Project [client_ip#135, log_ts#136, prev_ts#144, CASE WHEN isnull(prev_ts#144) THEN cast(null as bigint) ELSE (unix_timestamp(log_ts#136, yyyy-MM-dd HH:mm:ss, Some(UTC), true) - unix_timestamp(prev_ts#144, yyyy-MM-dd HH:mm:ss, Some(UTC), true)) END AS gap_secs#145L]
+                  +- Project [client_ip#135, log_ts#136, prev_ts#144]
+                     +- Project [client_ip#135, log_ts#136, prev_ts#144, prev_ts#144]
+                        +- Window [lag(log_ts#136, -1, null) windowspecdefinition(client_ip#135, log_ts#136 ASC NULLS FIRST, specifiedwindowframe(RowFrame, -1, -1)) AS prev_ts#144], [client_ip#135], [log_ts#136 ASC NULLS FIRST]
+                           +- Project [client_ip#135, log_ts#136]
+                              +- Project [client_ip#135, log_ts#136]
+                                 +- Relation [client_ip#135,log_ts#136,http_method#137,request_path#138,http_version#139,status_code#140,response_bytes#141L,log_date#142] parquet
+
+== Analyzed Logical Plan ==
+client_ip: string, session_id: bigint, request_count: bigint, duration_secs: bigint
+Aggregate [client_ip#135, session_id#147L], [client_ip#135, session_id#147L, count(1) AS request_count#149L, (unix_timestamp(max(log_ts#136), yyyy-MM-dd HH:mm:ss, Some(UTC), true) - unix_timestamp(min(log_ts#136), yyyy-MM-dd HH:mm:ss, Some(UTC), true)) AS duration_secs#150L]
++- Project [client_ip#135, log_ts#136, prev_ts#144, gap_secs#145L, is_new_session#146, session_id#147L]
+   +- Project [client_ip#135, log_ts#136, prev_ts#144, gap_secs#145L, is_new_session#146, session_id#147L, session_id#147L]
+      +- Window [sum(is_new_session#146) windowspecdefinition(client_ip#135, log_ts#136 ASC NULLS FIRST, specifiedwindowframe(RowFrame, unboundedpreceding$(), currentrow$())) AS session_id#147L], [client_ip#135], [log_ts#136 ASC NULLS FIRST]
+         +- Project [client_ip#135, log_ts#136, prev_ts#144, gap_secs#145L, is_new_session#146]
+            +- Project [client_ip#135, log_ts#136, prev_ts#144, gap_secs#145L, CASE WHEN (isnull(prev_ts#144) OR (gap_secs#145L > cast(1800 as bigint))) THEN 1 ELSE 0 END AS is_new_session#146]
+               +- Project [client_ip#135, log_ts#136, prev_ts#144, CASE WHEN isnull(prev_ts#144) THEN cast(null as bigint) ELSE (unix_timestamp(log_ts#136, yyyy-MM-dd HH:mm:ss, Some(UTC), true) - unix_timestamp(prev_ts#144, yyyy-MM-dd HH:mm:ss, Some(UTC), true)) END AS gap_secs#145L]
+                  +- Project [client_ip#135, log_ts#136, prev_ts#144]
+                     +- Project [client_ip#135, log_ts#136, prev_ts#144, prev_ts#144]
+                        +- Window [lag(log_ts#136, -1, null) windowspecdefinition(client_ip#135, log_ts#136 ASC NULLS FIRST, specifiedwindowframe(RowFrame, -1, -1)) AS prev_ts#144], [client_ip#135], [log_ts#136 ASC NULLS FIRST]
+                           +- Project [client_ip#135, log_ts#136]
+                              +- Project [client_ip#135, log_ts#136]
+                                 +- Relation [client_ip#135,log_ts#136,http_method#137,request_path#138,http_version#139,status_code#140,response_bytes#141L,log_date#142] parquet
+
+== Optimized Logical Plan ==
+Aggregate [client_ip#135, session_id#147L], [client_ip#135, session_id#147L, count(1) AS request_count#149L, (unix_timestamp(max(log_ts#136), yyyy-MM-dd HH:mm:ss, Some(UTC), true) - unix_timestamp(min(log_ts#136), yyyy-MM-dd HH:mm:ss, Some(UTC), true)) AS duration_secs#150L]
++- Project [client_ip#135, log_ts#136, session_id#147L]
+   +- Window [sum(is_new_session#146) windowspecdefinition(client_ip#135, log_ts#136 ASC NULLS FIRST, specifiedwindowframe(RowFrame, unboundedpreceding$(), currentrow$())) AS session_id#147L], [client_ip#135], [log_ts#136 ASC NULLS FIRST]
+      +- Project [client_ip#135, log_ts#136, CASE WHEN (isnull(prev_ts#144) OR CASE WHEN isnull(prev_ts#144) THEN false ELSE ((unix_timestamp(log_ts#136, yyyy-MM-dd HH:mm:ss, Some(UTC), true) - unix_timestamp(prev_ts#144, yyyy-MM-dd HH:mm:ss, Some(UTC), true)) > 1800) END) THEN 1 ELSE 0 END AS is_new_session#146]
+         +- Window [lag(log_ts#136, -1, null) windowspecdefinition(client_ip#135, log_ts#136 ASC NULLS FIRST, specifiedwindowframe(RowFrame, -1, -1)) AS prev_ts#144], [client_ip#135], [log_ts#136 ASC NULLS FIRST]
+            +- Project [client_ip#135, log_ts#136]
+               +- Relation [client_ip#135,log_ts#136,http_method#137,request_path#138,http_version#139,status_code#140,response_bytes#141L,log_date#142] parquet
+
+== Physical Plan ==
+AdaptiveSparkPlan isFinalPlan=false
++- HashAggregate(keys=[client_ip#135, session_id#147L], functions=[count(1), max(log_ts#136), min(log_ts#136)], output=[client_ip#135, session_id#147L, request_count#149L, duration_secs#150L])
+   +- HashAggregate(keys=[client_ip#135, session_id#147L], functions=[partial_count(1), partial_max(log_ts#136), partial_min(log_ts#136)], output=[client_ip#135, session_id#147L, count#173L, max#174, min#175])
+      +- Project [client_ip#135, log_ts#136, session_id#147L]
+         +- Window [sum(is_new_session#146) windowspecdefinition(client_ip#135, log_ts#136 ASC NULLS FIRST, specifiedwindowframe(RowFrame, unboundedpreceding$(), currentrow$())) AS session_id#147L], [client_ip#135], [log_ts#136 ASC NULLS FIRST]
+            +- Project [client_ip#135, log_ts#136, CASE WHEN (isnull(prev_ts#144) OR CASE WHEN isnull(prev_ts#144) THEN false ELSE ((unix_timestamp(log_ts#136, yyyy-MM-dd HH:mm:ss, Some(UTC), true) - unix_timestamp(prev_ts#144, yyyy-MM-dd HH:mm:ss, Some(UTC), true)) > 1800) END) THEN 1 ELSE 0 END AS is_new_session#146]
+               +- Window [lag(log_ts#136, -1, null) windowspecdefinition(client_ip#135, log_ts#136 ASC NULLS FIRST, specifiedwindowframe(RowFrame, -1, -1)) AS prev_ts#144], [client_ip#135], [log_ts#136 ASC NULLS FIRST]
+                  +- Sort [client_ip#135 ASC NULLS FIRST, log_ts#136 ASC NULLS FIRST], false, 0
+                     +- Exchange hashpartitioning(client_ip#135, 12), ENSURE_REQUIREMENTS, [plan_id=125]
+                        +- FileScan parquet [client_ip#135,log_ts#136] Batched: true, DataFilters: [], Format: Parquet, Location: InMemoryFileIndex(1 paths)[file:/mnt/c/Users/risha/OneDrive/Desktop/CS532/cs532-spark-benchmark/d..., PartitionFilters: [], PushedFilters: [], ReadSchema: struct<client_ip:string,log_ts:timestamp>
+

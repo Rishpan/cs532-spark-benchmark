@@ -36,19 +36,6 @@ def build_queries(spark: SparkSession, parquet_path: str, view_name: str, timeou
         FROM sessions_raw
     """)
 
-    spark.sql("""
-        CREATE OR REPLACE TEMP VIEW session_stats AS
-        SELECT
-            client_ip,
-            session_id,
-            MIN(log_ts) AS session_start,
-            MAX(log_ts) AS session_end,
-            COUNT(*) AS request_count,
-            UNIX_TIMESTAMP(MAX(log_ts)) - UNIX_TIMESTAMP(MIN(log_ts)) AS duration_secs
-        FROM sessions_with_id
-        GROUP BY client_ip, session_id
-    """)
-
     sessions = spark.sql("""
         SELECT
             client_ip,
@@ -138,4 +125,3 @@ if __name__ == "__main__":
     spark.catalog.dropTempView(view_name)
     spark.catalog.dropTempView("sessions_raw")
     spark.catalog.dropTempView("sessions_with_id")
-    spark.catalog.dropTempView("session_stats")

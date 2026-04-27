@@ -116,12 +116,12 @@ def _run_and_capture_plans_sessionization(
     label: str,
     output_dir: str,
 ): 
-    """ I choice sessions DF/RDD because it has more transformations and shuffles"""
+    """ I choice sessions DF/RDD because it has more transformations and shuffles. Also includes window function."""
     if label == "DataFrame":
-        sessions_df = df_build_sessionization(spark, parquet_path)
+        sessions_df, _ = df_build_sessionization(spark, parquet_path)
         _capture_df_plan(sessions_df, "sessionization", output_dir)
     elif label == "RDD":
-        sessions_rdd = rdd_build_sessionization(spark, parquet_path)
+        sessions_rdd, _ = rdd_build_sessionization(spark, parquet_path)
         _capture_rdd_lineage(sessions_rdd, "sessionization", output_dir)
 
 def _parse_args() -> argparse.Namespace:
