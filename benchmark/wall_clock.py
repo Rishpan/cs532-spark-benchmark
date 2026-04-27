@@ -71,6 +71,18 @@ from src.queries.temporal_aggregation.DataFrame.pipeline import (
     build_queries as df_build_temporal,
 )
 
+from src.queries.sessionization.DataFrame.pipeline import (
+    build_queries as df_build_sessionization,
+)
+
+from src.queries.sessionization.SQL.pipeline import (
+    build_queries as sql_build_sessionization,
+)
+
+from src.queries.sessionization.RDD.pipeline import (
+    build_queries as rdd_build_sessionization,
+)
+
 _VIEW_NAME = "zanbil_logs_view"
 
 
@@ -178,6 +190,25 @@ def _time_run_traffic_profiling_naive(label: str, spark: SparkSession, parquet_p
     print(f"[benchmark] {label} finished in {elapsed:.3f}s", flush=True)
     return {"api": label, "elapsed_sec": round(elapsed, 3)}
 
+def _time_run_sessionization(label: str, spark: SparkSession, parquet_path: str) -> dict[str, Any]:
+    """Run one API variant and return its wall-clock time in seconds."""
+    print(f"[benchmark] starting {label} ...", flush=True)
+    start = time.perf_counter()
+
+    if label == "RDD":
+        sessions, per_ip = rdd_build_sessionization(spark, parquet_path)
+        sessions.count(); per_ip.count()
+    elif label == "DataFrame":
+        sessions, per_ip = df_build_sessionization(spark, parquet_path)
+        sessions.count(); per_ip.count()
+    elif label == "SQL":
+        sessions, per_ip = sql_build_sessionization(spark, parquet_path, _VIEW_NAME)
+        sessions.count(); per_ip.count()
+
+    elapsed = time.perf_counter() - start
+    print(f"[benchmark] {label} finished in {elapsed:.3f}s", flush=True)
+    return {"api": label, "elapsed_sec": round(elapsed, 3)}
+
 
 def _write_results(content: str, output_path: str) -> None:
     """Write content to output_path.
@@ -234,14 +265,21 @@ def main() -> None:
         _time_run_traffic_profiling_naive("SQL", spark, args.parquet_path),
     ]
 
-    # TODO: Add timing for sessionization query
+    
+    sessionization_runs = [
+        _time_run_sessionization("RDD", spark, args.parquet_path),
+        _time_run_sessionization("DataFrame", spark, args.parquet_path),
+        _time_run_sessionization("SQL", spark, args.parquet_path),
+    ]
 
     results = {
         "error_pattern_analysis": error_pattern_runs,
         "temporal_aggregation": temporal_aggregation_runs,
         "perhost_traffic_profiling": traffic_profiling_runs,
-        "perhost_traffic_profiling_naive": traffic_profiling_naive_runs
+        "perhost_traffic_profiling_naive": traffic_profiling_naive_runs,
+        "sessionization": sessionization_runs,
     }
+    
     payload = json.dumps(results, indent=2)
     print(payload, flush=True)
 

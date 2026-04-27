@@ -42,6 +42,10 @@ from src.queries.temporal_aggregation.RDD.pipeline import build_queries as rdd_b
 from src.queries.temporal_aggregation.SQL.pipeline import build_queries as sql_build_temporal
 from src.queries.temporal_aggregation.DataFrame.pipeline import build_queries as df_build_temporal
 
+from src.queries.sessionization.RDD.pipeline import build_queries as rdd_build_sessionization
+from src.queries.sessionization.SQL.pipeline import build_queries as sql_build_sessionization
+from src.queries.sessionization.DataFrame.pipeline import build_queries as df_build_sessionization
+
 _VIEW_NAME = "zanbil_logs_view"
 
 
@@ -183,6 +187,28 @@ def _stage_run_traffic_profiling_naive(
     print(f"[stages] {label}: {metrics}", flush=True)
     return {"api": label, **metrics}
 
+def _stage_run_sessionization(
+    label: str, spark: SparkSession, parquet_path: str,
+    ui_url: str, app_id: str,
+) -> dict[str, Any]:
+    print(f"[stages] starting sessionization/{label} ...", flush=True)
+    pre = _snapshot_stage_ids(ui_url, app_id)
+
+    if label == "RDD":
+        sessions, per_ip = rdd_build_sessionization(spark, parquet_path)
+        sessions.count(); per_ip.count()
+    elif label == "DataFrame":
+        sessions, per_ip = df_build_sessionization(spark, parquet_path)
+        sessions.count(); per_ip.count()
+    elif label == "SQL":
+        sessions, per_ip = sql_build_sessionization(spark, parquet_path, _VIEW_NAME)
+        sessions.count(); per_ip.count()
+
+    # Must pass in pre to see which stages are new since the pre-run snapshot
+    metrics = _collect_stage_metrics(ui_url, app_id, pre)
+    print(f"[stages] {label}: {metrics}", flush=True)
+    return {"api": label, **metrics}
+
 def _parse_args() -> argparse.Namespace:
     load_env()
     load_env(".env.dataproc")
@@ -230,6 +256,7 @@ def main() -> None:
         "temporal_aggregation":          [_stage_run_temporal_aggregation(a, spark, args.parquet_path, ui_url, app_id) for a in apis],
         "perhost_traffic_profiling":     [_stage_run_traffic_profiling(a, spark, args.parquet_path, ui_url, app_id) for a in apis],
         "perhost_traffic_profiling_naive":[_stage_run_traffic_profiling_naive(a, spark, args.parquet_path, ui_url, app_id) for a in apis],
+        "sessionization":                [_stage_run_sessionization(a, spark, args.parquet_path, ui_url, app_id) for a in apis],
     }
 
     payload = json.dumps(results, indent=2)

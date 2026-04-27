@@ -56,7 +56,7 @@ def _assign_sessions(timestamps: list, timeout: int) -> list[dict]:
     return sessions
 
 
-def run(spark: SparkSession, parquet_path: str, timeout: int = SESSION_TIMEOUT_SECS) -> dict:
+def build_queries(spark: SparkSession, parquet_path: str, timeout: int = SESSION_TIMEOUT_SECS) -> dict:
     rdd = read_parquet_into_rdd(spark, parquet_path, COLS)
 
     # (client_ip, log_ts)
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     load_env()
     parquet_path = require_env("OUTPUT_PARQUET_PATH")
     spark = get_spark_session()
-    sessions_rdd, per_ip_rdd = run(spark, parquet_path)
+    sessions_rdd, per_ip_rdd = build_queries(spark, parquet_path)
     sessions_rdd.count()
     per_ip_rdd.count()
     
