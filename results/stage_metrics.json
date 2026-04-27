@@ -7,8 +7,8 @@
       "shuffle_read_bytes": 1281492,
       "shuffle_write_bytes": 641838,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.402,
-      "executor_cpu_time_sec": 5.780142825
+      "executor_deserialize_time_sec": 0.565,
+      "executor_cpu_time_sec": 3.719756214
     },
     {
       "api": "DataFrame",
@@ -17,8 +17,8 @@
       "shuffle_read_bytes": 255949,
       "shuffle_write_bytes": 255949,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.104,
-      "executor_cpu_time_sec": 1.421052427
+      "executor_deserialize_time_sec": 0.082,
+      "executor_cpu_time_sec": 0.88560951
     },
     {
       "api": "SQL",
@@ -27,8 +27,8 @@
       "shuffle_read_bytes": 255949,
       "shuffle_write_bytes": 255949,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.061,
-      "executor_cpu_time_sec": 0.656323273
+      "executor_deserialize_time_sec": 0.03,
+      "executor_cpu_time_sec": 0.328451808
     }
   ],
   "temporal_aggregation": [
@@ -39,8 +39,8 @@
       "shuffle_read_bytes": 1901,
       "shuffle_write_bytes": 1901,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.055,
-      "executor_cpu_time_sec": 2.467336047
+      "executor_deserialize_time_sec": 0.018,
+      "executor_cpu_time_sec": 1.526645688
     },
     {
       "api": "DataFrame",
@@ -49,8 +49,8 @@
       "shuffle_read_bytes": 1996,
       "shuffle_write_bytes": 1996,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.04,
-      "executor_cpu_time_sec": 0.604723835
+      "executor_deserialize_time_sec": 0.03,
+      "executor_cpu_time_sec": 0.36864136
     },
     {
       "api": "SQL",
@@ -59,8 +59,8 @@
       "shuffle_read_bytes": 1996,
       "shuffle_write_bytes": 1996,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.034,
-      "executor_cpu_time_sec": 0.283277322
+      "executor_deserialize_time_sec": 0.018,
+      "executor_cpu_time_sec": 0.167320655
     }
   ],
   "perhost_traffic_profiling": [
@@ -71,8 +71,8 @@
       "shuffle_read_bytes": 12194186,
       "shuffle_write_bytes": 12194186,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.019,
-      "executor_cpu_time_sec": 2.412058965
+      "executor_deserialize_time_sec": 0.021,
+      "executor_cpu_time_sec": 1.594215985
     },
     {
       "api": "DataFrame",
@@ -81,8 +81,8 @@
       "shuffle_read_bytes": 2292031,
       "shuffle_write_bytes": 2292031,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.046,
-      "executor_cpu_time_sec": 1.592185857
+      "executor_deserialize_time_sec": 0.017,
+      "executor_cpu_time_sec": 0.587938065
     },
     {
       "api": "SQL",
@@ -91,8 +91,8 @@
       "shuffle_read_bytes": 2292031,
       "shuffle_write_bytes": 2292031,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.035,
-      "executor_cpu_time_sec": 0.598341446
+      "executor_deserialize_time_sec": 0.023,
+      "executor_cpu_time_sec": 0.276712762
     }
   ],
   "perhost_traffic_profiling_naive": [
@@ -103,8 +103,8 @@
       "shuffle_read_bytes": 28735032,
       "shuffle_write_bytes": 22814582,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.089,
-      "executor_cpu_time_sec": 9.072071274
+      "executor_deserialize_time_sec": 0.038,
+      "executor_cpu_time_sec": 4.798516666
     },
     {
       "api": "DataFrame",
@@ -113,8 +113,8 @@
       "shuffle_read_bytes": 11460155,
       "shuffle_write_bytes": 11460155,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.076,
-      "executor_cpu_time_sec": 1.774466239
+      "executor_deserialize_time_sec": 0.046,
+      "executor_cpu_time_sec": 1.003160712
     },
     {
       "api": "SQL",
@@ -123,8 +123,8 @@
       "shuffle_read_bytes": 11460155,
       "shuffle_write_bytes": 11460155,
       "disk_bytes_spilled": 0,
-      "executor_deserialize_time_sec": 0.079,
-      "executor_cpu_time_sec": 1.818049282
+      "executor_deserialize_time_sec": 0.053,
+      "executor_cpu_time_sec": 0.975965625
     }
   ]
 }

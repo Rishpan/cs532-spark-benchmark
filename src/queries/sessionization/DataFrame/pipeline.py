@@ -60,7 +60,7 @@ def build_queries(spark: SparkSession, parquet_path: str, timeout: int = SESSION
         (
             F.unix_timestamp(F.max("log_ts")) - F.unix_timestamp(F.min("log_ts"))
         ).alias("duration_secs"),
-    ).cache()
+    )
 
     # Per-IP metrics: aggregate over all sessions for each IP
     per_ip = sessions.groupBy("client_ip").agg(

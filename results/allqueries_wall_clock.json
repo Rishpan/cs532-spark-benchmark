@@ -2,57 +2,57 @@
   "error_pattern_analysis": [
     {
       "api": "RDD",
-      "elapsed_sec": 18.749
+      "elapsed_sec": 17.169
     },
     {
       "api": "DataFrame",
-      "elapsed_sec": 6.239
+      "elapsed_sec": 5.617
     },
     {
       "api": "SQL",
-      "elapsed_sec": 1.899
+      "elapsed_sec": 2.321
     }
   ],
   "temporal_aggregation": [
     {
       "api": "RDD",
-      "elapsed_sec": 3.469
+      "elapsed_sec": 4.37
     },
     {
       "api": "DataFrame",
-      "elapsed_sec": 1.935
+      "elapsed_sec": 2.167
     },
     {
       "api": "SQL",
-      "elapsed_sec": 0.978
+      "elapsed_sec": 1.09
     }
   ],
   "perhost_traffic_profiling": [
     {
       "api": "RDD",
-      "elapsed_sec": 4.796
+      "elapsed_sec": 5.306
     },
     {
       "api": "DataFrame",
-      "elapsed_sec": 1.401
+      "elapsed_sec": 1.67
     },
     {
       "api": "SQL",
-      "elapsed_sec": 0.708
+      "elapsed_sec": 0.66
     }
   ],
   "perhost_traffic_profiling_naive": [
     {
       "api": "RDD",
-      "elapsed_sec": 10.961
+      "elapsed_sec": 12.826
     },
     {
       "api": "DataFrame",
-      "elapsed_sec": 3.002
+      "elapsed_sec": 3.508
     },
     {
       "api": "SQL",
-      "elapsed_sec": 1.886
+      "elapsed_sec": 1.82
     }
   ]
 }
