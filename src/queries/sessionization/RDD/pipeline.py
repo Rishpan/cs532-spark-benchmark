@@ -121,6 +121,7 @@ if __name__ == "__main__":
     sessions_rdd, per_ip_rdd = run(spark, parquet_path)
     sessions_rdd.count()
     per_ip_rdd.count()
+    
     # print("Session count per IP (top 10):")
     # for ip, count in results["session_counts"][:10]:
     #     print(f"  {ip}: {count} sessions")
