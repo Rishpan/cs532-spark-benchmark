@@ -15,9 +15,11 @@ Usage (Dataproc):
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import subprocess
 import tempfile
+from datetime import datetime, timezone
 from pathlib import Path
 
 from pyspark.sql import SparkSession
@@ -119,6 +121,8 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Capture execution plans for selected queries.")
     parser.add_argument("--parquet-path", default=os.environ.get("OUTPUT_PARQUET_PATH", ""))
     parser.add_argument("--output-dir", default=os.environ.get("RESULTS_PATH", "results/plans"))
+    parser.add_argument("--scale-pct", type=int, default=None)
+    parser.add_argument("--benchmark-id", default=None)
     return parser.parse_args()
 
 def main() -> None:
@@ -132,8 +136,21 @@ def main() -> None:
     spark = get_spark_session()
     spark.sparkContext.setLogLevel("WARN")
     
+    benchmark_id = args.benchmark_id or datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
     output_dir = args.output_dir
     parquet_path = args.parquet_path
+
+    _write_results(
+        json.dumps(
+            {
+                "benchmark_id": benchmark_id,
+                "scale_pct": args.scale_pct,
+                "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+            },
+            indent=2,
+        ),
+        f"{output_dir}/run_manifest.json",
+    )
 
     for label in ["DataFrame", "RDD"]:
         _run_and_capture_plans_error_pattern_analysis(spark, parquet_path, label, output_dir)

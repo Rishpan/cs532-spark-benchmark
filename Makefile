@@ -10,10 +10,17 @@ GCS_STAGING   := $(GCS_PREFIX)/staging
 GCS_RAW_LOG   := $(GCS_PREFIX)/data/raw/access.log.gz
 GCS_PARQUET   := $(GCS_PREFIX)/data/processed/access_logs
 GCS_RESULTS   := $(GCS_PREFIX)/results
+SCALE_PCTS    ?= 5 10 25 50 100
+BENCHMARK_ID  ?= $(shell date +%Y%m%d-%H%M%S)-pct$(SCALE_PCT)
+GCS_PARQUET_SCALE := $(GCS_PARQUET)/pct=$(SCALE_PCT)
+GCS_RESULTS_SCALE := $(GCS_RESULTS)/scaling/pct=$(SCALE_PCT)
+GCS_RESULTS_RUN   := $(GCS_RESULTS_SCALE)/id=$(BENCHMARK_ID)
+LOCAL_RESULTS_SCALE := results/scaling/pct=$(SCALE_PCT)
+FETCH_BENCHMARK_ID ?=
 
 .PHONY: setup-services setup-iam bucket-create bucket-delete cluster-create cluster-delete \
         job-log-parsing job-wall-clock job-stage-metrics job-plans \
-        stage-raw-log fetch-results help
+        stage-raw-log fetch-results help check-scale
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Packaging — real file target, only re-zips when source files change
@@ -105,6 +112,7 @@ cluster-create: .staged
 	  --num-workers=$(CLUSTER_WORKERS) \
 	  --image-version=2.1-debian11 \
 	  --initialization-actions=$(GCS_STAGING)/init-install.sh \
+	  --properties=dataproc:dataproc.scheduler.max-concurrent-jobs=1 \
 	  --enable-component-gateway
 	@echo "[cluster] $(CLUSTER_NAME) created"
 
@@ -118,22 +126,41 @@ cluster-delete:
 # Jobs
 # ──────────────────────────────────────────────────────────────────────────────
 
+check-scale:
+	@if [ -z "$(SCALE_PCT)" ]; then \
+	  echo "[error] SCALE_PCT is required (allowed: $(SCALE_PCTS))"; \
+	  exit 1; \
+	fi
+	@case " $(SCALE_PCTS) " in \
+	  *" $(SCALE_PCT) "*) ;; \
+	  *) echo "[error] SCALE_PCT=$(SCALE_PCT) is not in allowed set: $(SCALE_PCTS)"; exit 1 ;; \
+	esac
+
 # Prerequisite: parse raw access.log → Parquet in GCS.
 # .env.dataproc (staged alongside src.zip) is loaded by run_log_parsing.py,
 # so no --properties overrides are needed here.
-job-log-parsing: .staged
-	gcloud dataproc jobs submit pyspark \
-	  $(GCS_STAGING)/run_log_parsing.py \
-	  --cluster=$(CLUSTER_NAME) \
-	  --region=$(REGION) \
-	  --project=$(GCP_PROJECT) \
-	  --py-files=$(GCS_STAGING)/src.zip \
-	  --files=$(GCS_STAGING)/.env.dataproc \
-	  --properties=spark.sql.shuffle.partitions=$(SPARK_SHUFFLE_PARTITIONS)
-	@echo "[job] log-parsing complete → $(GCS_PARQUET)"
+# Skips submission when the parquet output already has a Spark _SUCCESS marker
+# for the requested scale. Set FORCE=1 to re-run anyway.
+job-log-parsing: check-scale .staged
+	@if [ -z "$(FORCE)" ] && gcloud storage ls $(GCS_PARQUET_SCALE)/_SUCCESS >/dev/null 2>&1; then \
+	  echo "[job] log-parsing already complete for scale=$(SCALE_PCT) at $(GCS_PARQUET_SCALE) (use FORCE=1 to re-run)"; \
+	else \
+	  gcloud dataproc jobs submit pyspark \
+	    $(GCS_STAGING)/run_log_parsing.py \
+	    --cluster=$(CLUSTER_NAME) \
+	    --region=$(REGION) \
+	    --project=$(GCP_PROJECT) \
+	    --py-files=$(GCS_STAGING)/src.zip \
+	    --files=$(GCS_STAGING)/.env.dataproc \
+	    --properties=spark.sql.shuffle.partitions=$(SPARK_SHUFFLE_PARTITIONS) \
+	    -- \
+	    --sample-percent $(SCALE_PCT) \
+	    --output-parquet-path $(GCS_PARQUET_SCALE) \
+	  && echo "[job] log-parsing complete (scale=$(SCALE_PCT)) → $(GCS_PARQUET_SCALE)"; \
+	fi
 
 # Wall-clock benchmark: measures elapsed time for all queries across all three APIs.
-job-wall-clock: .staged
+job-wall-clock: check-scale .staged
 	gcloud dataproc jobs submit pyspark \
 	  $(GCS_STAGING)/wall_clock.py \
 	  --cluster=$(CLUSTER_NAME) \
@@ -143,12 +170,15 @@ job-wall-clock: .staged
 	  --files=$(GCS_STAGING)/.env.dataproc \
 	  --properties=spark.sql.shuffle.partitions=$(SPARK_SHUFFLE_PARTITIONS) \
 	  -- \
-	  --parquet-path $(GCS_PARQUET) \
-	  --output-path $(GCS_RESULTS)/allqueries_wall_clock.json
-	@echo "[job] wall-clock benchmark complete → $(GCS_RESULTS)/allqueries_wall_clock.json"
+	  --parquet-path $(GCS_PARQUET_SCALE) \
+	  --output-path $(GCS_RESULTS_RUN)/allqueries_wall_clock.json \
+	  --merged-output-path $(GCS_RESULTS_SCALE)/allqueries_wall_clock_merged.json \
+	  --scale-pct $(SCALE_PCT) \
+	  --benchmark-id $(BENCHMARK_ID)
+	@echo "[job] wall-clock benchmark complete (scale=$(SCALE_PCT), id=$(BENCHMARK_ID))"
 
 # Stage metrics benchmark: collects shuffle, spill, and task counts via the Spark /stages API.
-job-stage-metrics: .staged
+job-stage-metrics: check-scale .staged
 	gcloud dataproc jobs submit pyspark \
 	  $(GCS_STAGING)/stage_metrics.py \
 	  --cluster=$(CLUSTER_NAME) \
@@ -158,12 +188,15 @@ job-stage-metrics: .staged
 	  --files=$(GCS_STAGING)/.env.dataproc \
 	  --properties=spark.sql.shuffle.partitions=$(SPARK_SHUFFLE_PARTITIONS) \
 	  -- \
-	  --parquet-path $(GCS_PARQUET) \
-	  --output-path $(GCS_RESULTS)/stage_metrics.json
-	@echo "[job] stage-metrics benchmark complete → $(GCS_RESULTS)/stage_metrics.json"
+	  --parquet-path $(GCS_PARQUET_SCALE) \
+	  --output-path $(GCS_RESULTS_RUN)/stage_metrics.json \
+	  --merged-output-path $(GCS_RESULTS_SCALE)/stage_metrics_merged.json \
+	  --scale-pct $(SCALE_PCT) \
+	  --benchmark-id $(BENCHMARK_ID)
+	@echo "[job] stage-metrics benchmark complete (scale=$(SCALE_PCT), id=$(BENCHMARK_ID))"
 
 # Plans benchmark: captures DataFrame query plans and RDD lineages for all queries.
-job-plans: .staged
+job-plans: check-scale .staged
 	gcloud dataproc jobs submit pyspark \
 	  $(GCS_STAGING)/plans.py \
 	  --cluster=$(CLUSTER_NAME) \
@@ -173,21 +206,32 @@ job-plans: .staged
 	  --files=$(GCS_STAGING)/.env.dataproc \
 	  --properties=spark.sql.shuffle.partitions=$(SPARK_SHUFFLE_PARTITIONS) \
 	  -- \
-	  --parquet-path $(GCS_PARQUET) \
-	  --output-dir $(GCS_RESULTS)/plans
-	@echo "[job] plans benchmark complete → $(GCS_RESULTS)/plans"
+	  --parquet-path $(GCS_PARQUET_SCALE) \
+	  --output-dir $(GCS_RESULTS_RUN)/plans \
+	  --scale-pct $(SCALE_PCT) \
+	  --benchmark-id $(BENCHMARK_ID)
+	@echo "[job] plans benchmark complete (scale=$(SCALE_PCT), id=$(BENCHMARK_ID))"
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Fetch results back to local machine
 # ──────────────────────────────────────────────────────────────────────────────
-fetch-results:
-	mkdir -p results/plans
-	gcloud storage cp $(GCS_RESULTS)/allqueries_wall_clock.json results/allqueries_wall_clock.json 2>/dev/null \
-	  && echo "[fetch] allqueries_wall_clock.json saved" || echo "[fetch] allqueries_wall_clock.json not found, skipping"
-	gcloud storage cp $(GCS_RESULTS)/stage_metrics.json results/stage_metrics.json 2>/dev/null \
-	  && echo "[fetch] stage_metrics.json saved" || echo "[fetch] stage_metrics.json not found, skipping"
-	gcloud storage rsync -r $(GCS_RESULTS)/plans results/plans 2>/dev/null \
-	  && echo "[fetch] plans/ saved" || echo "[fetch] plans/ not found, skipping"
+fetch-results: check-scale
+	@if [ -n "$(FETCH_BENCHMARK_ID)" ]; then \
+	  SRC="$(GCS_RESULTS_SCALE)/id=$(FETCH_BENCHMARK_ID)"; \
+	  DST="$(LOCAL_RESULTS_SCALE)/id=$(FETCH_BENCHMARK_ID)"; \
+	  mkdir -p "$$DST"; \
+	  gcloud storage rsync -r "$$SRC" "$$DST" 2>/dev/null \
+	    && echo "[fetch] fetched scale=$(SCALE_PCT) id=$(FETCH_BENCHMARK_ID)" \
+	    || echo "[fetch] no artifacts for scale=$(SCALE_PCT) id=$(FETCH_BENCHMARK_ID), skipping"; \
+	else \
+	  mkdir -p "$(LOCAL_RESULTS_SCALE)"; \
+	  gcloud storage rsync -r "$(GCS_RESULTS_SCALE)" "$(LOCAL_RESULTS_SCALE)" 2>/dev/null \
+	    && echo "[fetch] fetched all IDs for scale=$(SCALE_PCT)" \
+	    || echo "[fetch] no artifacts for scale=$(SCALE_PCT), skipping"; \
+	fi
+	python -m benchmark.merge_results --kind wall_clock --source-dir "$(LOCAL_RESULTS_SCALE)" --merged-output "$(LOCAL_RESULTS_SCALE)/allqueries_wall_clock_merged.json"
+	python -m benchmark.merge_results --kind stage_metrics --source-dir "$(LOCAL_RESULTS_SCALE)" --merged-output "$(LOCAL_RESULTS_SCALE)/stage_metrics_merged.json"
+	@echo "[fetch] merged rollups updated under $(LOCAL_RESULTS_SCALE)"
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Help
@@ -205,12 +249,13 @@ help:
 	@echo "  .staged                Re-upload GCS staging artifacts only when files change"
 	@echo "  cluster-create         Provision Dataproc cluster"
 	@echo "  cluster-delete         Tear down Dataproc cluster"
-	@echo "  job-log-parsing        Submit log-parsing preprocessing job"
-	@echo "  job-wall-clock         Submit wall-clock benchmark job (all queries, all APIs)"
-	@echo "  job-stage-metrics      Submit stage-metrics benchmark job (shuffle/spill/task counts)"
-	@echo "  job-plans              Submit plans benchmark job (DataFrame plans + RDD lineages)"
-	@echo "  fetch-results          Copy all benchmark results back to results/"
+	@echo "  job-log-parsing        Submit log-parsing preprocessing job (requires SCALE_PCT)"
+	@echo "  job-wall-clock         Submit wall-clock benchmark job (requires SCALE_PCT)"
+	@echo "  job-stage-metrics      Submit stage-metrics benchmark job (requires SCALE_PCT)"
+	@echo "  job-plans              Submit plans benchmark job (requires SCALE_PCT)"
+	@echo "  fetch-results          Fetch+merge results for SCALE_PCT (optional FETCH_BENCHMARK_ID)"
 	@echo "                         Benchmark repeat counts: WALL_CLOCK_NUM_RUNS, STAGE_METRICS_NUM_RUNS"
+	@echo "                         Allowed SCALE_PCTS: $(SCALE_PCTS)"
 	@echo ""
 	@echo "Prerequisites (one-time):"
 	@echo "  1. Copy .env.dataproc.example → .env.dataproc and fill in your values"
@@ -220,5 +265,5 @@ help:
 	@echo "  5. make stage-raw-log    — compress and upload access.log to GCS"
 	@echo ""
 	@echo "Pipeline (run in order):"
-	@echo "  make cluster-create → make job-log-parsing → make job-wall-clock / job-stage-metrics / job-plans → make fetch-results → make cluster-delete"
+	@echo "  make cluster-create → make job-log-parsing SCALE_PCT=5 → make job-wall-clock SCALE_PCT=5 → make job-stage-metrics SCALE_PCT=5 → make fetch-results SCALE_PCT=5 → make cluster-delete"
 	@echo ""

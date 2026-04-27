@@ -72,7 +72,19 @@ By default, wall-clock runs each query/API once. Set `WALL_CLOCK_NUM_RUNS` in `.
 ```bash
 python -m benchmark.wall_clock --num-runs 5
 ```
-Output now includes per-run rows (`run` index) and a `summary` block with `avg_elapsed_sec` and `std_elapsed_sec` per API.
+Output now includes:
+- per-run rows (`run` index),
+- a `summary` block with `avg_elapsed_sec` and `std_elapsed_sec` per API,
+- metadata (`benchmark_id`, `scale_pct`, `generated_at_utc`).
+
+For local-only runs, `--scale-pct` and `--benchmark-id` are optional:
+```bash
+python -m benchmark.wall_clock \
+        --parquet-path data/processed/access_logs \
+        --output-path results/allqueries_wall_clock.json \
+        --scale-pct 25 \
+        --benchmark-id local-test-001
+```
 
 To get all other metrics (fetched via /stages API endpoint), run:
 ```bash
@@ -89,7 +101,7 @@ By default, stage-metrics runs each query/API once. Set `STAGE_METRICS_NUM_RUNS`
 ```bash
 python -m benchmark.stage_metrics --num-runs 5
 ```
-Output now includes per-run rows (`run` index) and a `summary` block with per-metric avg/std per API.
+Output now includes per-run rows (`run` index), a `summary` block with per-metric avg/std per API, and metadata (`benchmark_id`, `scale_pct`, `generated_at_utc`).
 
 To get the plans for the different queries with Dataframe API and the lineages for the queries with the RDD API, run:
 ```bash
@@ -101,6 +113,8 @@ python -m benchmark.plans \
         --parquet-path data/processed/access_logs \
         --output-dir results/plans
 ```
+
+`benchmark.plans` also writes `run_manifest.json` with `benchmark_id`, `scale_pct`, and timestamp metadata.
 <!-- ## Mid-Project Goals, due by 4/15/2026 11:59 PM EST
 - Set up shared GitHub repository and development environment (PySpark installed and tested on each member's machine)
 - Download and preprocess the Zanbil.ir E-commerce Web Server Access Logs dataset; verify it loads correctly in PySpark
@@ -156,19 +170,30 @@ This compresses `access.log` to `staging/access.log.gz` locally (only if the sou
 
 ### Run the pipeline
 
-Run each step in order:
+Run each step in order (with required `SCALE_PCT`):
 
 ```bash
-make cluster-create       # provision the Dataproc cluster
-make job-log-parsing      # parse raw logs → Parquet in GCS
-make job-wall-clock       # run RDD / DataFrame / SQL wall-clock benchmark
-make job-stage-metrics    # collect shuffle / spill / task-count metrics
-make job-plans            # capture DataFrame query plans and RDD lineages
-make fetch-results        # copy results to results/ (skips any not yet run)
+make cluster-create                    # provision the Dataproc cluster
+make job-log-parsing SCALE_PCT=5       # parse+sample raw logs into scale-specific Parquet
+make job-wall-clock SCALE_PCT=5        # run wall-clock benchmark for this scale
+make job-stage-metrics SCALE_PCT=5     # run stage metrics benchmark for this scale
+make job-plans SCALE_PCT=5             # capture plans for this scale
+make fetch-results SCALE_PCT=5         # fetch raw run artifacts + merge deduped rollups locally
 make cluster-delete       # tear down the cluster
 ```
 
-Results are saved under **`results/`** (for example `allqueries_wall_clock.json`, `stage_metrics.json`, and `plans/`).
+Scale behavior:
+- Allowed scale values are controlled by `SCALE_PCTS` in the `Makefile`.
+- Every scale writes sampled parquet to `gs://<bucket>/data/processed/access_logs/pct=<SCALE_PCT>/`.
+- Every benchmark run writes raw outputs to `gs://<bucket>/results/scaling/pct=<SCALE_PCT>/id=<BENCHMARK_ID>/`.
+- `BENCHMARK_ID` auto-generates if omitted.
+
+Merge behavior (two-side, idempotent):
+- On cluster write: wall-clock and stage-metrics also upsert merged per-scale rollups in GCS.
+- On `fetch-results`: local merged rollups are rebuilt/updated from downloaded raw artifacts without duplicates.
+- Dedupe keys include `benchmark_id`, `scale_pct`, query, API, and run.
+
+Local fetched artifacts are stored under **`results/scaling/pct=<SCALE_PCT>/`**.
 
 Other useful targets:
 

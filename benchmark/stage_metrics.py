@@ -19,12 +19,14 @@ import os
 import statistics
 import subprocess
 import tempfile
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import requests
 from pyspark.sql import SparkSession
 
+from benchmark.merge_results import merge_payload
 from src.session import get_spark_session, load_env
 
 from src.queries.error_pattern_analysis.RDD.pipeline import build_queries as rdd_build
@@ -196,6 +198,13 @@ def _parse_args() -> argparse.Namespace:
         default=int(os.environ.get("STAGE_METRICS_NUM_RUNS", "1")),
         help="Number of times to run each query/API variant (default: STAGE_METRICS_NUM_RUNS or 1)",
     )
+    parser.add_argument("--scale-pct", type=int, default=None)
+    parser.add_argument("--benchmark-id", default=None)
+    parser.add_argument(
+        "--merged-output-path",
+        default=None,
+        help="Optional merged output destination to upsert this payload into.",
+    )
     return parser.parse_args()
 
 
@@ -278,6 +287,7 @@ def main() -> None:
         raise ValueError("--parquet-path is required")
     if args.num_runs < 1:
         raise ValueError("--num-runs must be >= 1")
+    benchmark_id = args.benchmark_id or datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
 
     spark = get_spark_session()
     spark.sparkContext.setLogLevel("WARN")
@@ -331,7 +341,11 @@ def main() -> None:
         args.num_runs,
     )
 
-    results = {
+    results: dict[str, Any] = {
+        "benchmark_id": benchmark_id,
+        "scale_pct": args.scale_pct,
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "num_runs": args.num_runs,
         "error_pattern_analysis": error_pattern_runs,
         "temporal_aggregation": temporal_aggregation_runs,
         "perhost_traffic_profiling": traffic_profiling_runs,
@@ -347,6 +361,9 @@ def main() -> None:
     payload = json.dumps(results, indent=2)
     print(payload, flush=True)
     _write_results(payload, args.output_path)
+    if args.merged_output_path:
+        merge_payload("stage_metrics", results, args.merged_output_path)
+        print(f"[stages] merged results upserted to {args.merged_output_path}", flush=True)
 
 
 if __name__ == "__main__":
