@@ -39,6 +39,9 @@ from src.queries.perhost_traffic_profiling.DataFrame.pipeline import build_queri
 from src.queries.temporal_aggregation.RDD.pipeline import build_queries as rdd_build_temporal
 from src.queries.temporal_aggregation.DataFrame.pipeline import build_queries as df_build_temporal
 
+from src.queries.sessionization.RDD.pipeline import build_queries as rdd_build_sessionization
+from src.queries.sessionization.DataFrame.pipeline import build_queries as df_build_sessionization
+
 def _write_results(content: str, output_path: str) -> None:
     if output_path.startswith("gs://"):
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
@@ -114,6 +117,21 @@ def _run_and_capture_plans_error_pattern_analysis(
         top_endpoints_rdd, _ = rdd_build(spark, parquet_path)
         _capture_rdd_lineage(top_endpoints_rdd, "error_pattern", output_dir)
     print(f"[plans] finished error_pattern_analysis/{label}", flush=True)
+    
+def _run_and_capture_plans_sessionization(
+    spark: SparkSession,
+    parquet_path: str,
+    label: str,
+    output_dir: str,
+): 
+    """ I choice sessions DF/RDD because it has more transformations and shuffles. Also includes window function."""
+    if label == "DataFrame":
+        sessions_df, _ = df_build_sessionization(spark, parquet_path)
+        _capture_df_plan(sessions_df, "sessionization", output_dir)
+    elif label == "RDD":
+        sessions_rdd, _ = rdd_build_sessionization(spark, parquet_path)
+        _capture_rdd_lineage(sessions_rdd, "sessionization", output_dir)
+    print(f"[plans] finished sessionization/{label}", flush=True)
 
 def _parse_args() -> argparse.Namespace:
     load_env()
@@ -156,6 +174,7 @@ def main() -> None:
         _run_and_capture_plans_error_pattern_analysis(spark, parquet_path, label, output_dir)
         _run_and_capture_plans_temporal_aggregation(spark, parquet_path, label, output_dir)
         _run_and_capture_plans_traffic_profiling(spark, parquet_path, label, output_dir)
-
+        _run_and_capture_plans_sessionization(spark, parquet_path, label, output_dir)
+        
 if __name__ == "__main__":
     main()

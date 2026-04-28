@@ -60,6 +60,7 @@ def _payload_records_wall_clock(payload: dict[str, Any]) -> tuple[list[dict[str,
         "temporal_aggregation",
         "perhost_traffic_profiling",
         "perhost_traffic_profiling_naive",
+        "sessionization",
     ):
         for rec in payload.get(query, []):
             run_records.append(
@@ -101,6 +102,7 @@ def _payload_records_stage_metrics(payload: dict[str, Any]) -> tuple[list[dict[s
         "temporal_aggregation",
         "perhost_traffic_profiling",
         "perhost_traffic_profiling_naive",
+        "sessionization",
     ):
         for rec in payload.get(query, []):
             run_records.append(

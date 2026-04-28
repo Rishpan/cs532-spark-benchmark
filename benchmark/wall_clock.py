@@ -74,6 +74,18 @@ from src.queries.temporal_aggregation.DataFrame.pipeline import (
     build_queries as df_build_temporal,
 )
 
+from src.queries.sessionization.DataFrame.pipeline import (
+    build_queries as df_build_sessionization,
+)
+
+from src.queries.sessionization.SQL.pipeline import (
+    build_queries as sql_build_sessionization,
+)
+
+from src.queries.sessionization.RDD.pipeline import (
+    build_queries as rdd_build_sessionization,
+)
+
 _VIEW_NAME = "zanbil_logs_view"
 
 
@@ -194,6 +206,25 @@ def _time_run_traffic_profiling_naive(label: str, spark: SparkSession, parquet_p
     print(f"[benchmark] perhost_traffic_profiling_naive/{label} finished in {elapsed:.3f}s", flush=True)
     return {"api": label, "elapsed_sec": round(elapsed, 3)}
 
+def _time_run_sessionization(label: str, spark: SparkSession, parquet_path: str) -> dict[str, Any]:
+    """Run one API variant and return its wall-clock time in seconds."""
+    print(f"[benchmark] starting {label} ...", flush=True)
+    start = time.perf_counter()
+
+    if label == "RDD":
+        sessions, per_ip = rdd_build_sessionization(spark, parquet_path)
+        sessions.count(); per_ip.count()
+    elif label == "DataFrame":
+        sessions, per_ip = df_build_sessionization(spark, parquet_path)
+        sessions.count(); per_ip.count()
+    elif label == "SQL":
+        sessions, per_ip = sql_build_sessionization(spark, parquet_path, _VIEW_NAME)
+        sessions.count(); per_ip.count()
+
+    elapsed = time.perf_counter() - start
+    print(f"[benchmark] {label} finished in {elapsed:.3f}s", flush=True)
+    return {"api": label, "elapsed_sec": round(elapsed, 3)}
+
 
 def _run_query_many(
     query_name: str,
@@ -303,7 +334,14 @@ def main() -> None:
         args.num_runs,
     )
 
-    # TODO: Add timing for sessionization query
+    sessionization_runs = _run_query_many(
+        "sessionization",
+        _time_run_sessionization,
+        spark,
+        args.parquet_path,
+        apis,
+        args.num_runs,
+    )
 
     results: dict[str, Any] = {
         "benchmark_id": benchmark_id,
@@ -314,13 +352,16 @@ def main() -> None:
         "temporal_aggregation": temporal_aggregation_runs,
         "perhost_traffic_profiling": traffic_profiling_runs,
         "perhost_traffic_profiling_naive": traffic_profiling_naive_runs,
+        "sessionization": sessionization_runs,
         "summary": {
             "error_pattern_analysis": _summarize_elapsed(error_pattern_runs),
             "temporal_aggregation": _summarize_elapsed(temporal_aggregation_runs),
             "perhost_traffic_profiling": _summarize_elapsed(traffic_profiling_runs),
             "perhost_traffic_profiling_naive": _summarize_elapsed(traffic_profiling_naive_runs),
+            "sessionization": _summarize_elapsed(sessionization_runs),
         },
     }
+    
     payload = json.dumps(results, indent=2)
     print(payload, flush=True)
 
