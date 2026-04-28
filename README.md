@@ -192,6 +192,11 @@ make fetch-results SCALE_PCT=5         # fetch raw run artifacts + merge deduped
 make cluster-delete                    # tear down the cluster
 ```
 
+To run multiple repetitions per query/API in Dataproc, pass Make vars when submitting:
+```bash
+WALL_CLOCK_NUM_RUNS=2 STAGE_METRICS_NUM_RUNS=2 make job-benchmark SCALE_PCT=5
+```
+
 Scale behavior:
 - Allowed scale values are controlled by `SCALE_PCTS` in the `Makefile`.
 - Every scale writes sampled parquet to `gs://<bucket>/data/processed/access_logs/pct=<SCALE_PCT>/`.

@@ -17,6 +17,8 @@ GCS_RESULTS_SCALE := $(GCS_RESULTS)/scaling/pct=$(SCALE_PCT)
 GCS_RESULTS_RUN   := $(GCS_RESULTS_SCALE)/id=$(BENCHMARK_ID)
 LOCAL_RESULTS_SCALE := results/scaling/pct=$(SCALE_PCT)
 FETCH_BENCHMARK_ID ?=
+WALL_CLOCK_NUM_RUNS ?= 1
+STAGE_METRICS_NUM_RUNS ?= 1
 
 .PHONY: setup-services setup-iam bucket-create bucket-delete cluster-create cluster-delete \
         job-log-parsing job-benchmark job-plans \
@@ -183,6 +185,8 @@ job-benchmark: check-parquet-ready .staged
 	  --wall-clock-merged-output-path $(GCS_RESULTS_SCALE)/allqueries_wall_clock_merged.json \
 	  --stage-metrics-output-path $(GCS_RESULTS_RUN)/stage_metrics.json \
 	  --stage-metrics-merged-output-path $(GCS_RESULTS_SCALE)/stage_metrics_merged.json \
+	  --wall-clock-num-runs $(WALL_CLOCK_NUM_RUNS) \
+	  --stage-metrics-num-runs $(STAGE_METRICS_NUM_RUNS) \
 	  --scale-pct $(SCALE_PCT) \
 	  --benchmark-id $(BENCHMARK_ID)
 	@echo "[job] benchmark complete (scale=$(SCALE_PCT), id=$(BENCHMARK_ID))"
