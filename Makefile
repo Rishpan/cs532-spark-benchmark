@@ -17,8 +17,6 @@ GCS_RESULTS_SCALE := $(GCS_RESULTS)/scaling/pct=$(SCALE_PCT)
 GCS_RESULTS_RUN   := $(GCS_RESULTS_SCALE)/id=$(BENCHMARK_ID)
 LOCAL_RESULTS_SCALE := results/scaling/pct=$(SCALE_PCT)
 FETCH_BENCHMARK_ID ?=
-WALL_CLOCK_NUM_RUNS ?= 1
-STAGE_METRICS_NUM_RUNS ?= 1
 
 .PHONY: setup-services setup-iam bucket-create bucket-delete cluster-create cluster-delete \
         job-log-parsing job-benchmark job-plans \
@@ -171,6 +169,21 @@ job-log-parsing: check-scale .staged
 
 # Combined benchmark: wall-clock timing + stage metrics (shuffle/spill/tasks) in one Spark job.
 job-benchmark: check-parquet-ready .staged
+	@if [ "$(origin WALL_CLOCK_NUM_RUNS)" != "command line" ] || [ -z "$(WALL_CLOCK_NUM_RUNS)" ]; then \
+	  echo "[error] WALL_CLOCK_NUM_RUNS must be passed explicitly on the make command line (e.g. WALL_CLOCK_NUM_RUNS=2)"; \
+	  exit 1; \
+	fi
+	@if [ "$(origin STAGE_METRICS_NUM_RUNS)" != "command line" ] || [ -z "$(STAGE_METRICS_NUM_RUNS)" ]; then \
+	  echo "[error] STAGE_METRICS_NUM_RUNS must be passed explicitly on the make command line (e.g. STAGE_METRICS_NUM_RUNS=2)"; \
+	  exit 1; \
+	fi
+	@case "$(WALL_CLOCK_NUM_RUNS)" in ''|*[!0-9]*|0) \
+	  echo "[error] WALL_CLOCK_NUM_RUNS must be a positive integer"; exit 1 ;; \
+	esac
+	@case "$(STAGE_METRICS_NUM_RUNS)" in ''|*[!0-9]*|0) \
+	  echo "[error] STAGE_METRICS_NUM_RUNS must be a positive integer"; exit 1 ;; \
+	esac
+	@echo "[job] run counts: wall_clock=$(WALL_CLOCK_NUM_RUNS), stage_metrics=$(STAGE_METRICS_NUM_RUNS)"
 	gcloud dataproc jobs submit pyspark \
 	  $(GCS_STAGING)/run_benchmark.py \
 	  --cluster=$(CLUSTER_NAME) \
@@ -247,7 +260,7 @@ help:
 	@echo "  cluster-delete         Tear down Dataproc cluster"
 	@echo "  job-log-parsing        Submit log-parsing preprocessing job (requires SCALE_PCT)"
 	@echo "  check-parquet-ready    Fail if sampled Parquet for SCALE_PCT has no _SUCCESS (job-benchmark, job-plans)"
-	@echo "  job-benchmark          Submit wall-clock + stage-metrics benchmark (requires SCALE_PCT; needs Parquet)"
+	@echo "  job-benchmark          Submit wall-clock + stage-metrics benchmark (requires SCALE_PCT, Parquet, and explicit WALL_CLOCK_NUM_RUNS/STAGE_METRICS_NUM_RUNS)"
 	@echo "  job-plans              Submit plans benchmark (requires SCALE_PCT; needs Parquet)"
 	@echo "  fetch-results          Fetch+merge results for SCALE_PCT (optional FETCH_BENCHMARK_ID)"
 	@echo "                         Benchmark repeat counts: WALL_CLOCK_NUM_RUNS, STAGE_METRICS_NUM_RUNS"

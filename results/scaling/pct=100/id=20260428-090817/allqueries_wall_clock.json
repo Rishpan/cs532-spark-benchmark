@@ -1,0 +1,478 @@
+{
+  "benchmark_id": "20260428-090817",
+  "scale_pct": 100,
+  "generated_at_utc": "2026-04-28T17:30:45.453594+00:00",
+  "num_runs": 5,
+  "error_pattern_analysis": [
+    {
+      "api": "RDD",
+      "elapsed_sec": 69.973,
+      "run": 1
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 15.192,
+      "run": 1
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 12.611,
+      "run": 1
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 36.909,
+      "run": 2
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 10.627,
+      "run": 2
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 10.184,
+      "run": 2
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 35.838,
+      "run": 3
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 9.694,
+      "run": 3
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 9.201,
+      "run": 3
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 35.991,
+      "run": 4
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 9.828,
+      "run": 4
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 8.974,
+      "run": 4
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 56.422,
+      "run": 5
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 16.475,
+      "run": 5
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 9.104,
+      "run": 5
+    }
+  ],
+  "temporal_aggregation": [
+    {
+      "api": "RDD",
+      "elapsed_sec": 44.027,
+      "run": 1
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 8.291,
+      "run": 1
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 7.805,
+      "run": 1
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 43.205,
+      "run": 2
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 7.542,
+      "run": 2
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 6.703,
+      "run": 2
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 41.756,
+      "run": 3
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 7.106,
+      "run": 3
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 6.358,
+      "run": 3
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 41.961,
+      "run": 4
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 7.456,
+      "run": 4
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 6.322,
+      "run": 4
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 41.842,
+      "run": 5
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 6.944,
+      "run": 5
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 6.77,
+      "run": 5
+    }
+  ],
+  "perhost_traffic_profiling": [
+    {
+      "api": "RDD",
+      "elapsed_sec": 257.511,
+      "run": 1
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 10.336,
+      "run": 1
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 5.607,
+      "run": 1
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 252.468,
+      "run": 2
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 10.891,
+      "run": 2
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 5.088,
+      "run": 2
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 267.891,
+      "run": 3
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 11.692,
+      "run": 3
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 5.076,
+      "run": 3
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 279.737,
+      "run": 4
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 11.646,
+      "run": 4
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 5.064,
+      "run": 4
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 280.006,
+      "run": 5
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 10.893,
+      "run": 5
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 5.166,
+      "run": 5
+    }
+  ],
+  "perhost_traffic_profiling_naive": [
+    {
+      "api": "RDD",
+      "elapsed_sec": 234.562,
+      "run": 1
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 20.806,
+      "run": 1
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 17.829,
+      "run": 1
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 183.525,
+      "run": 2
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 28.195,
+      "run": 2
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 17.053,
+      "run": 2
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 198.725,
+      "run": 3
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 17.634,
+      "run": 3
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 16.38,
+      "run": 3
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 197.069,
+      "run": 4
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 18.272,
+      "run": 4
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 15.945,
+      "run": 4
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 209.015,
+      "run": 5
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 19.333,
+      "run": 5
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 16.241,
+      "run": 5
+    }
+  ],
+  "sessionization": [
+    {
+      "api": "RDD",
+      "elapsed_sec": 47.01,
+      "run": 1
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 23.031,
+      "run": 1
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 19.638,
+      "run": 1
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 38.557,
+      "run": 2
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 15.013,
+      "run": 2
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 12.808,
+      "run": 2
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 37.807,
+      "run": 3
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 12.499,
+      "run": 3
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 12.681,
+      "run": 3
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 38.309,
+      "run": 4
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 13.052,
+      "run": 4
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 12.838,
+      "run": 4
+    },
+    {
+      "api": "RDD",
+      "elapsed_sec": 38.116,
+      "run": 5
+    },
+    {
+      "api": "DataFrame",
+      "elapsed_sec": 12.628,
+      "run": 5
+    },
+    {
+      "api": "SQL",
+      "elapsed_sec": 13.027,
+      "run": 5
+    }
+  ],
+  "summary": {
+    "error_pattern_analysis": {
+      "RDD": {
+        "num_runs": 5,
+        "avg_elapsed_sec": 47.027,
+        "std_elapsed_sec": 13.886
+      },
+      "DataFrame": {
+        "num_runs": 5,
+        "avg_elapsed_sec": 12.363,
+        "std_elapsed_sec": 2.88
+      },
+      "SQL": {
+        "num_runs": 5,
+        "avg_elapsed_sec": 10.015,
+        "std_elapsed_sec": 1.367
+      }
+    },
+    "temporal_aggregation": {
+      "RDD": {
+        "num_runs": 5,
+        "avg_elapsed_sec": 42.558,
+        "std_elapsed_sec": 0.904
+      },
+      "DataFrame": {
+        "num_runs": 5,
+        "avg_elapsed_sec": 7.468,
+        "std_elapsed_sec": 0.467
+      },
+      "SQL": {
+        "num_runs": 5,
+        "avg_elapsed_sec": 6.792,
+        "std_elapsed_sec": 0.537
+      }
+    },
+    "perhost_traffic_profiling": {
+      "RDD": {
+        "num_runs": 5,
+        "avg_elapsed_sec": 267.523,
+        "std_elapsed_sec": 11.243
+      },
+      "DataFrame": {
+        "num_runs": 5,
+        "avg_elapsed_sec": 11.092,
+        "std_elapsed_sec": 0.514
+      },
+      "SQL": {
+        "num_runs": 5,
+        "avg_elapsed_sec": 5.2,
+        "std_elapsed_sec": 0.207
+      }
+    },
+    "perhost_traffic_profiling_naive": {
+      "RDD": {
+        "num_runs": 5,
+        "avg_elapsed_sec": 204.579,
+        "std_elapsed_sec": 17.045
+      },
+      "DataFrame": {
+        "num_runs": 5,
+        "avg_elapsed_sec": 20.848,
+        "std_elapsed_sec": 3.827
+      },
+      "SQL": {
+        "num_runs": 5,
+        "avg_elapsed_sec": 16.69,
+        "std_elapsed_sec": 0.676
+      }
+    },
+    "sessionization": {
+      "RDD": {
+        "num_runs": 5,
+        "avg_elapsed_sec": 39.96,
+        "std_elapsed_sec": 3.534
+      },
+      "DataFrame": {
+        "num_runs": 5,
+        "avg_elapsed_sec": 15.245,
+        "std_elapsed_sec": 3.997
+      },
+      "SQL": {
+        "num_runs": 5,
+        "avg_elapsed_sec": 14.198,
+        "std_elapsed_sec": 2.722
+      }
+    }
+  }
+}

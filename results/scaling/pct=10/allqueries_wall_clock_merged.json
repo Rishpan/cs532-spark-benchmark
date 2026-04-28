@@ -240,6 +240,606 @@
       "api": "SQL",
       "run": 1,
       "elapsed_sec": 8.511
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "error_pattern_analysis",
+      "api": "RDD",
+      "run": 1,
+      "elapsed_sec": 30.417
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "error_pattern_analysis",
+      "api": "DataFrame",
+      "run": 1,
+      "elapsed_sec": 16.383
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "error_pattern_analysis",
+      "api": "SQL",
+      "run": 1,
+      "elapsed_sec": 11.367
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "error_pattern_analysis",
+      "api": "RDD",
+      "run": 2,
+      "elapsed_sec": 10.521
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "error_pattern_analysis",
+      "api": "DataFrame",
+      "run": 2,
+      "elapsed_sec": 10.936
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "error_pattern_analysis",
+      "api": "SQL",
+      "run": 2,
+      "elapsed_sec": 10.417
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "error_pattern_analysis",
+      "api": "RDD",
+      "run": 3,
+      "elapsed_sec": 10.4
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "error_pattern_analysis",
+      "api": "DataFrame",
+      "run": 3,
+      "elapsed_sec": 9.938
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "error_pattern_analysis",
+      "api": "SQL",
+      "run": 3,
+      "elapsed_sec": 9.998
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "error_pattern_analysis",
+      "api": "RDD",
+      "run": 4,
+      "elapsed_sec": 10.902
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "error_pattern_analysis",
+      "api": "DataFrame",
+      "run": 4,
+      "elapsed_sec": 9.678
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "error_pattern_analysis",
+      "api": "SQL",
+      "run": 4,
+      "elapsed_sec": 9.881
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "error_pattern_analysis",
+      "api": "RDD",
+      "run": 5,
+      "elapsed_sec": 10.17
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "error_pattern_analysis",
+      "api": "DataFrame",
+      "run": 5,
+      "elapsed_sec": 9.343
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "error_pattern_analysis",
+      "api": "SQL",
+      "run": 5,
+      "elapsed_sec": 8.958
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "temporal_aggregation",
+      "api": "RDD",
+      "run": 1,
+      "elapsed_sec": 8.286
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "temporal_aggregation",
+      "api": "DataFrame",
+      "run": 1,
+      "elapsed_sec": 7.338
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "temporal_aggregation",
+      "api": "SQL",
+      "run": 1,
+      "elapsed_sec": 7.042
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "temporal_aggregation",
+      "api": "RDD",
+      "run": 2,
+      "elapsed_sec": 9.442
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "temporal_aggregation",
+      "api": "DataFrame",
+      "run": 2,
+      "elapsed_sec": 6.773
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "temporal_aggregation",
+      "api": "SQL",
+      "run": 2,
+      "elapsed_sec": 6.607
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "temporal_aggregation",
+      "api": "RDD",
+      "run": 3,
+      "elapsed_sec": 8.741
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "temporal_aggregation",
+      "api": "DataFrame",
+      "run": 3,
+      "elapsed_sec": 7.0
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "temporal_aggregation",
+      "api": "SQL",
+      "run": 3,
+      "elapsed_sec": 7.1
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "temporal_aggregation",
+      "api": "RDD",
+      "run": 4,
+      "elapsed_sec": 8.548
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "temporal_aggregation",
+      "api": "DataFrame",
+      "run": 4,
+      "elapsed_sec": 9.387
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "temporal_aggregation",
+      "api": "SQL",
+      "run": 4,
+      "elapsed_sec": 7.095
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "temporal_aggregation",
+      "api": "RDD",
+      "run": 5,
+      "elapsed_sec": 9.029
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "temporal_aggregation",
+      "api": "DataFrame",
+      "run": 5,
+      "elapsed_sec": 7.361
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "temporal_aggregation",
+      "api": "SQL",
+      "run": 5,
+      "elapsed_sec": 6.732
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling",
+      "api": "RDD",
+      "run": 1,
+      "elapsed_sec": 8.129
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling",
+      "api": "DataFrame",
+      "run": 1,
+      "elapsed_sec": 3.948
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling",
+      "api": "SQL",
+      "run": 1,
+      "elapsed_sec": 4.248
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling",
+      "api": "RDD",
+      "run": 2,
+      "elapsed_sec": 7.778
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling",
+      "api": "DataFrame",
+      "run": 2,
+      "elapsed_sec": 4.519
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling",
+      "api": "SQL",
+      "run": 2,
+      "elapsed_sec": 3.896
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling",
+      "api": "RDD",
+      "run": 3,
+      "elapsed_sec": 7.869
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling",
+      "api": "DataFrame",
+      "run": 3,
+      "elapsed_sec": 3.985
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling",
+      "api": "SQL",
+      "run": 3,
+      "elapsed_sec": 4.008
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling",
+      "api": "RDD",
+      "run": 4,
+      "elapsed_sec": 7.539
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling",
+      "api": "DataFrame",
+      "run": 4,
+      "elapsed_sec": 4.551
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling",
+      "api": "SQL",
+      "run": 4,
+      "elapsed_sec": 3.726
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling",
+      "api": "RDD",
+      "run": 5,
+      "elapsed_sec": 7.378
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling",
+      "api": "DataFrame",
+      "run": 5,
+      "elapsed_sec": 4.749
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling",
+      "api": "SQL",
+      "run": 5,
+      "elapsed_sec": 3.729
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling_naive",
+      "api": "RDD",
+      "run": 1,
+      "elapsed_sec": 25.407
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling_naive",
+      "api": "DataFrame",
+      "run": 1,
+      "elapsed_sec": 16.294
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling_naive",
+      "api": "SQL",
+      "run": 1,
+      "elapsed_sec": 15.468
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling_naive",
+      "api": "RDD",
+      "run": 2,
+      "elapsed_sec": 24.18
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling_naive",
+      "api": "DataFrame",
+      "run": 2,
+      "elapsed_sec": 17.11
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling_naive",
+      "api": "SQL",
+      "run": 2,
+      "elapsed_sec": 16.834
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling_naive",
+      "api": "RDD",
+      "run": 3,
+      "elapsed_sec": 24.624
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling_naive",
+      "api": "DataFrame",
+      "run": 3,
+      "elapsed_sec": 24.105
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling_naive",
+      "api": "SQL",
+      "run": 3,
+      "elapsed_sec": 26.026
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling_naive",
+      "api": "RDD",
+      "run": 4,
+      "elapsed_sec": 27.757
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling_naive",
+      "api": "DataFrame",
+      "run": 4,
+      "elapsed_sec": 15.7
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling_naive",
+      "api": "SQL",
+      "run": 4,
+      "elapsed_sec": 15.827
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling_naive",
+      "api": "RDD",
+      "run": 5,
+      "elapsed_sec": 22.697
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling_naive",
+      "api": "DataFrame",
+      "run": 5,
+      "elapsed_sec": 15.853
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling_naive",
+      "api": "SQL",
+      "run": 5,
+      "elapsed_sec": 15.444
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "sessionization",
+      "api": "RDD",
+      "run": 1,
+      "elapsed_sec": 6.724
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "sessionization",
+      "api": "DataFrame",
+      "run": 1,
+      "elapsed_sec": 10.092
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "sessionization",
+      "api": "SQL",
+      "run": 1,
+      "elapsed_sec": 8.038
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "sessionization",
+      "api": "RDD",
+      "run": 2,
+      "elapsed_sec": 6.532
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "sessionization",
+      "api": "DataFrame",
+      "run": 2,
+      "elapsed_sec": 7.498
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "sessionization",
+      "api": "SQL",
+      "run": 2,
+      "elapsed_sec": 7.623
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "sessionization",
+      "api": "RDD",
+      "run": 3,
+      "elapsed_sec": 6.108
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "sessionization",
+      "api": "DataFrame",
+      "run": 3,
+      "elapsed_sec": 7.646
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "sessionization",
+      "api": "SQL",
+      "run": 3,
+      "elapsed_sec": 10.709
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "sessionization",
+      "api": "RDD",
+      "run": 4,
+      "elapsed_sec": 6.528
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "sessionization",
+      "api": "DataFrame",
+      "run": 4,
+      "elapsed_sec": 8.838
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "sessionization",
+      "api": "SQL",
+      "run": 4,
+      "elapsed_sec": 7.707
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "sessionization",
+      "api": "RDD",
+      "run": 5,
+      "elapsed_sec": 6.464
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "sessionization",
+      "api": "DataFrame",
+      "run": 5,
+      "elapsed_sec": 10.439
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "sessionization",
+      "api": "SQL",
+      "run": 5,
+      "elapsed_sec": 7.937
     }
   ],
   "summary_records": [
@@ -512,6 +1112,141 @@
       "num_runs": 1,
       "avg_elapsed_sec": 8.511,
       "std_elapsed_sec": 0.0
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "error_pattern_analysis",
+      "api": "RDD",
+      "num_runs": 5,
+      "avg_elapsed_sec": 14.482,
+      "std_elapsed_sec": 7.971
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "error_pattern_analysis",
+      "api": "DataFrame",
+      "num_runs": 5,
+      "avg_elapsed_sec": 11.256,
+      "std_elapsed_sec": 2.618
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "error_pattern_analysis",
+      "api": "SQL",
+      "num_runs": 5,
+      "avg_elapsed_sec": 10.124,
+      "std_elapsed_sec": 0.783
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "temporal_aggregation",
+      "api": "RDD",
+      "num_runs": 5,
+      "avg_elapsed_sec": 8.809,
+      "std_elapsed_sec": 0.399
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "temporal_aggregation",
+      "api": "DataFrame",
+      "num_runs": 5,
+      "avg_elapsed_sec": 7.572,
+      "std_elapsed_sec": 0.934
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "temporal_aggregation",
+      "api": "SQL",
+      "num_runs": 5,
+      "avg_elapsed_sec": 6.915,
+      "std_elapsed_sec": 0.205
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling",
+      "api": "RDD",
+      "num_runs": 5,
+      "avg_elapsed_sec": 7.739,
+      "std_elapsed_sec": 0.261
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling",
+      "api": "DataFrame",
+      "num_runs": 5,
+      "avg_elapsed_sec": 4.35,
+      "std_elapsed_sec": 0.323
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling",
+      "api": "SQL",
+      "num_runs": 5,
+      "avg_elapsed_sec": 3.921,
+      "std_elapsed_sec": 0.195
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling_naive",
+      "api": "RDD",
+      "num_runs": 5,
+      "avg_elapsed_sec": 24.933,
+      "std_elapsed_sec": 1.665
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling_naive",
+      "api": "DataFrame",
+      "num_runs": 5,
+      "avg_elapsed_sec": 17.812,
+      "std_elapsed_sec": 3.184
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "perhost_traffic_profiling_naive",
+      "api": "SQL",
+      "num_runs": 5,
+      "avg_elapsed_sec": 17.92,
+      "std_elapsed_sec": 4.084
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "sessionization",
+      "api": "RDD",
+      "num_runs": 5,
+      "avg_elapsed_sec": 6.471,
+      "std_elapsed_sec": 0.201
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "sessionization",
+      "api": "DataFrame",
+      "num_runs": 5,
+      "avg_elapsed_sec": 8.903,
+      "std_elapsed_sec": 1.211
+    },
+    {
+      "benchmark_id": "20260428-090817",
+      "scale_pct": 10,
+      "query": "sessionization",
+      "api": "SQL",
+      "num_runs": 5,
+      "avg_elapsed_sec": 8.403,
+      "std_elapsed_sec": 1.163
     }
   ]
 }

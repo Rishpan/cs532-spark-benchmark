@@ -192,10 +192,11 @@ make fetch-results SCALE_PCT=5         # fetch raw run artifacts + merge deduped
 make cluster-delete                    # tear down the cluster
 ```
 
-To run multiple repetitions per query/API in Dataproc, pass Make vars when submitting:
+To run multiple repetitions per query/API in Dataproc, pass Make vars explicitly on the `make` command line:
 ```bash
-WALL_CLOCK_NUM_RUNS=2 STAGE_METRICS_NUM_RUNS=2 make job-benchmark SCALE_PCT=5
+make job-benchmark SCALE_PCT=5 WALL_CLOCK_NUM_RUNS=2 STAGE_METRICS_NUM_RUNS=2
 ```
+`job-benchmark` now fails fast if these run-count variables are omitted.
 
 Scale behavior:
 - Allowed scale values are controlled by `SCALE_PCTS` in the `Makefile`.
