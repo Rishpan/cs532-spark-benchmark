@@ -49,7 +49,8 @@ def get_spark_session() -> SparkSession:
     java_opts = require_env("SPARK_JAVA_OPTS").strip()
 
     b = (
-        SparkSession.builder.master(master)
+        SparkSession.builder
+        .master(master)  # type: ignore[union-attr]
         .appName(app_name)
         .config("spark.sql.shuffle.partitions", shuffle)
         .config("spark.sql.session.timeZone", "UTC")

@@ -15,9 +15,11 @@ Usage (Dataproc):
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import subprocess
 import tempfile
+from datetime import datetime, timezone
 from pathlib import Path
 
 from pyspark.sql import SparkSession
@@ -72,12 +74,14 @@ def _run_and_capture_plans_traffic_profiling(
     """
     Run the specified query and capture its execution plan.
     """
+    print(f"[plans] starting perhost_traffic_profiling/{label} ...", flush=True)
     if label == "DataFrame":
         traffic_profiling_df = df_build_traffic(spark, parquet_path)
         _capture_df_plan(traffic_profiling_df, "traffic_profiling", output_dir)
     elif label == "RDD":
         traffic_profiling_rdd = rdd_build_traffic(spark, parquet_path)
         _capture_rdd_lineage(traffic_profiling_rdd, "traffic_profiling", output_dir)
+    print(f"[plans] finished perhost_traffic_profiling/{label}", flush=True)
 
     
 
@@ -88,12 +92,14 @@ def _run_and_capture_plans_temporal_aggregation(
     output_dir: str,
 ):
     """ I choice metrics_per_hour DF/RDD because it has more transformations and shuffles"""
+    print(f"[plans] starting temporal_aggregation/{label} ...", flush=True)
     if label == "DataFrame":
         metrics_per_hour_df, _ = df_build_temporal(spark, parquet_path)
         _capture_df_plan(metrics_per_hour_df, "temporal_agg", output_dir)
     elif label == "RDD":
         metrics_per_hour_rdd, _ = rdd_build_temporal(spark, parquet_path)
         _capture_rdd_lineage(metrics_per_hour_rdd, "temporal_agg", output_dir)
+    print(f"[plans] finished temporal_aggregation/{label}", flush=True)
 
 
 def _run_and_capture_plans_error_pattern_analysis(
@@ -103,12 +109,14 @@ def _run_and_capture_plans_error_pattern_analysis(
     output_dir: str,
 ): 
     """ I choose top_endpoints DF/RDD because it has more transformations and shuffles"""
+    print(f"[plans] starting error_pattern_analysis/{label} ...", flush=True)
     if label == "DataFrame":
         top_endpoints_df, _ = df_build(spark, parquet_path)
         _capture_df_plan(top_endpoints_df, "error_pattern", output_dir)
     elif label == "RDD":
         top_endpoints_rdd, _ = rdd_build(spark, parquet_path)
         _capture_rdd_lineage(top_endpoints_rdd, "error_pattern", output_dir)
+    print(f"[plans] finished error_pattern_analysis/{label}", flush=True)
     
 def _run_and_capture_plans_sessionization(
     spark: SparkSession,
@@ -123,6 +131,7 @@ def _run_and_capture_plans_sessionization(
     elif label == "RDD":
         sessions_rdd, _ = rdd_build_sessionization(spark, parquet_path)
         _capture_rdd_lineage(sessions_rdd, "sessionization", output_dir)
+    print(f"[plans] finished sessionization/{label}", flush=True)
 
 def _parse_args() -> argparse.Namespace:
     load_env()
@@ -130,6 +139,8 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Capture execution plans for selected queries.")
     parser.add_argument("--parquet-path", default=os.environ.get("OUTPUT_PARQUET_PATH", ""))
     parser.add_argument("--output-dir", default=os.environ.get("RESULTS_PATH", "results/plans"))
+    parser.add_argument("--scale-pct", type=int, default=None)
+    parser.add_argument("--benchmark-id", default=None)
     return parser.parse_args()
 
 def main() -> None:
@@ -143,8 +154,21 @@ def main() -> None:
     spark = get_spark_session()
     spark.sparkContext.setLogLevel("WARN")
     
+    benchmark_id = args.benchmark_id or datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
     output_dir = args.output_dir
     parquet_path = args.parquet_path
+
+    _write_results(
+        json.dumps(
+            {
+                "benchmark_id": benchmark_id,
+                "scale_pct": args.scale_pct,
+                "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+            },
+            indent=2,
+        ),
+        f"{output_dir}/run_manifest.json",
+    )
 
     for label in ["DataFrame", "RDD"]:
         _run_and_capture_plans_error_pattern_analysis(spark, parquet_path, label, output_dir)
