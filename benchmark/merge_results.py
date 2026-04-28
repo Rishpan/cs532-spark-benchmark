@@ -5,13 +5,8 @@ import argparse
 import json
 import subprocess
 import tempfile
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
-
-
-def _utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat()
 
 
 def _read_text(path: str) -> str | None:
@@ -152,12 +147,12 @@ def merge_payload(kind: str, payload: dict[str, Any], merged_output_path: str) -
     if existing_text is None:
         merged: dict[str, Any] = {
             "kind": kind,
-            "updated_at_utc": _utc_now(),
             "records": [],
             "summary_records": [],
         }
     else:
         merged = json.loads(existing_text)
+        merged.pop("updated_at_utc", None)
         merged.setdefault("records", [])
         merged.setdefault("summary_records", [])
 
@@ -177,7 +172,6 @@ def merge_payload(kind: str, payload: dict[str, Any], merged_output_path: str) -
     for rec in summary_records:
         by_summary[_summary_key(rec)] = rec
     merged["summary_records"] = list(by_summary.values())
-    merged["updated_at_utc"] = _utc_now()
 
     _write_text(merged_output_path, json.dumps(merged, indent=2))
 
