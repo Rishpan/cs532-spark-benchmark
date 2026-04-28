@@ -103,6 +103,17 @@ python -m benchmark.stage_metrics --num-runs 5
 ```
 Output now includes per-run rows (`run` index), a `summary` block with per-metric avg/std per API, and metadata (`benchmark_id`, `scale_pct`, `generated_at_utc`).
 
+**Same as Dataproc in one Spark job (optional):** to run wall-clock and stage-metrics back-to-back in a single local session—matching what `make job-benchmark` does on the cluster—use:
+
+```bash
+python -m benchmark.run_benchmark \
+        --parquet-path data/processed/access_logs \
+        --wall-clock-output-path results/allqueries_wall_clock.json \
+        --stage-metrics-output-path results/stage_metrics.json
+```
+
+Repeat counts use `--wall-clock-num-runs` and `--stage-metrics-num-runs` (or `WALL_CLOCK_NUM_RUNS` / `STAGE_METRICS_NUM_RUNS` in `.env`). Merged rollup paths (`--wall-clock-merged-output-path`, `--stage-metrics-merged-output-path`) are optional.
+
 To get the plans for the different queries with Dataframe API and the lineages for the queries with the RDD API, run:
 ```bash
 python -m benchmark.plans
@@ -125,7 +136,7 @@ python -m benchmark.plans \
 
 ## Running the Benchmark on GCP Dataproc
 
-The `Makefile` orchestrates the full pipeline: packaging source code, staging artifacts to GCS, provisioning a Dataproc cluster, running the log-parsing preprocessing job and the wall-clock benchmark job, fetching results back locally, and tearing down the cluster.
+The `Makefile` orchestrates the full pipeline: packaging source code, staging artifacts to GCS, provisioning a Dataproc cluster, running the log-parsing preprocessing job and a **combined** benchmark job (wall-clock timing and `/stages` metrics in one Spark application), fetching results back locally, and tearing down the cluster.
 
 ### Prerequisites
 
@@ -175,16 +186,16 @@ Run each step in order (with required `SCALE_PCT`):
 ```bash
 make cluster-create                    # provision the Dataproc cluster
 make job-log-parsing SCALE_PCT=5       # parse+sample raw logs into scale-specific Parquet
-make job-wall-clock SCALE_PCT=5        # run wall-clock benchmark for this scale
-make job-stage-metrics SCALE_PCT=5     # run stage metrics benchmark for this scale
+make job-benchmark SCALE_PCT=5         # wall-clock + stage-metrics in one Dataproc job
 make job-plans SCALE_PCT=5             # capture plans for this scale
 make fetch-results SCALE_PCT=5         # fetch raw run artifacts + merge deduped rollups locally
-make cluster-delete       # tear down the cluster
+make cluster-delete                    # tear down the cluster
 ```
 
 Scale behavior:
 - Allowed scale values are controlled by `SCALE_PCTS` in the `Makefile`.
 - Every scale writes sampled parquet to `gs://<bucket>/data/processed/access_logs/pct=<SCALE_PCT>/`.
+- `make job-benchmark` and `make job-plans` exit before submitting unless that scale’s Parquet prefix contains Spark’s `_SUCCESS` marker (run `make job-log-parsing SCALE_PCT=…` first).
 - Every benchmark run writes raw outputs to `gs://<bucket>/results/scaling/pct=<SCALE_PCT>/id=<BENCHMARK_ID>/`.
 - `BENCHMARK_ID` auto-generates if omitted.
 
@@ -199,6 +210,7 @@ Other useful targets:
 
 | Target | Description |
 |---|---|
+| `make job-benchmark` | Submit combined wall-clock + stage-metrics benchmark (requires `SCALE_PCT`) |
 | `make bucket-delete` | Delete the GCS bucket and all its contents |
 | `make help` | Print all available targets and the prerequisite order |
 
