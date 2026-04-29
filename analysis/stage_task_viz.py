@@ -27,15 +27,31 @@ fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10), sharex=True)
 
 for i, api in enumerate(apis):
     offsets = [xi + i * width for xi in x]
-    stages     = [avg.loc[(q, api), "num_stages"] for q in queries]
-    tasks      = [avg.loc[(q, api), "num_tasks"]  for q in queries]
+    stages = [avg.loc[(q, api), "num_stages"] for q in queries]
+    tasks = [avg.loc[(q, api), "num_tasks"] for q in queries]
     stages_err = [std.loc[(q, api), "num_stages"] for q in queries]
-    tasks_err  = [std.loc[(q, api), "num_tasks"]  for q in queries]
+    tasks_err = [std.loc[(q, api), "num_tasks"] for q in queries]
 
-    ax1.bar(offsets, stages, width, label=api, color=colors[api],
-            yerr=stages_err, capsize=4, error_kw={"elinewidth": 1.2, "ecolor": "black"})
-    ax2.bar(offsets, tasks,  width, label=api, color=colors[api],
-            yerr=tasks_err,  capsize=4, error_kw={"elinewidth": 1.2, "ecolor": "black"})
+    ax1.bar(
+        offsets,
+        stages,
+        width,
+        label=api,
+        color=colors[api],
+        yerr=stages_err,
+        capsize=4,
+        error_kw={"elinewidth": 1.2, "ecolor": "black"},
+    )
+    ax2.bar(
+        offsets,
+        tasks,
+        width,
+        label=api,
+        color=colors[api],
+        yerr=tasks_err,
+        capsize=4,
+        error_kw={"elinewidth": 1.2, "ecolor": "black"},
+    )
 
 for ax in (ax1, ax2):
     ax.set_xticks([xi + width for xi in x])

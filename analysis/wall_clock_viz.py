@@ -10,13 +10,15 @@ with open("../results/scaling/pct=100/allqueries_wall_clock_merged.json") as f:
 df = pd.DataFrame(data["records"])
 grouped = df.groupby(["query", "api"])["elapsed_sec"]
 means = grouped.mean().round(3).unstack()[["RDD", "DataFrame", "SQL"]]
-stds  = grouped.std().round(3).unstack()[["RDD", "DataFrame", "SQL"]]
+stds = grouped.std().round(3).unstack()[["RDD", "DataFrame", "SQL"]]
 
 means.plot(kind="bar", figsize=(10, 6), yerr=stds, capsize=4)
 plt.title("Average Elapsed Time by Query and API")
 plt.xlabel("Query")
 plt.ylabel("Average Elapsed Time (sec)")
-plt.xticks(rotation=45, ha="right")  # help with algining, sinc query names are kind of long
+plt.xticks(
+    rotation=45, ha="right"
+)  # help with algining, sinc query names are kind of long
 plt.legend(title="API")
 plt.tight_layout()
 plt.savefig("figures/wall_clock_comparison.png", dpi=150)

@@ -12,7 +12,9 @@ with open("../results/scaling/pct=100/stage_metrics_merged.json") as f:
 
 df = pd.DataFrame(data["records"])
 
-grouped = df.groupby(["query", "api"])[["executor_deserialize_time_sec", "executor_cpu_time_sec"]]
+grouped = df.groupby(["query", "api"])[
+    ["executor_deserialize_time_sec", "executor_cpu_time_sec"]
+]
 avg = grouped.mean()
 std = grouped.std()
 
@@ -22,22 +24,30 @@ apis = ["RDD", "DataFrame", "SQL"]
 x = range(len(queries))
 width = 0.25
 colors_deser = {"RDD": "#4C72B0", "DataFrame": "#DD8452", "SQL": "#55A868"}
-colors_cpu   = {"RDD": "#7FA8D9", "DataFrame": "#F2B482", "SQL": "#88CFA0"}
+colors_cpu = {"RDD": "#7FA8D9", "DataFrame": "#F2B482", "SQL": "#88CFA0"}
 
 fig, ax = plt.subplots(figsize=(12, 6))
 
 for i, api in enumerate(apis):
-    offsets   = [xi + i * width for xi in x]
-    deser     = [avg.loc[(q, api), "executor_deserialize_time_sec"] for q in queries]
-    cpu       = [avg.loc[(q, api), "executor_cpu_time_sec"]         for q in queries]
+    offsets = [xi + i * width for xi in x]
+    deser = [avg.loc[(q, api), "executor_deserialize_time_sec"] for q in queries]
+    cpu = [avg.loc[(q, api), "executor_cpu_time_sec"] for q in queries]
     deser_err = [std.loc[(q, api), "executor_deserialize_time_sec"] for q in queries]
-    cpu_err   = [std.loc[(q, api), "executor_cpu_time_sec"]         for q in queries]
+    cpu_err = [std.loc[(q, api), "executor_cpu_time_sec"] for q in queries]
     total_err = [d + c for d, c in zip(deser_err, cpu_err)]
 
     ax.bar(offsets, deser, width, label=f"{api} Deserialize", color=colors_deser[api])
-    ax.bar(offsets, cpu,   width, label=f"{api} CPU",         color=colors_cpu[api],
-           bottom=deser, yerr=total_err, capsize=4,
-           error_kw={"elinewidth": 1.2, "ecolor": "black"})
+    ax.bar(
+        offsets,
+        cpu,
+        width,
+        label=f"{api} CPU",
+        color=colors_cpu[api],
+        bottom=deser,
+        yerr=total_err,
+        capsize=4,
+        error_kw={"elinewidth": 1.2, "ecolor": "black"},
+    )
 
 ax.set_xticks([xi + width for xi in x])
 ax.set_xticklabels(queries, rotation=30, ha="right")

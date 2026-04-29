@@ -24,7 +24,7 @@ df = pd.DataFrame(records)
 
 grouped = df.groupby(["scale_pct", "query", "api"])["elapsed_sec"]
 means = grouped.mean()
-stds  = grouped.std()
+stds = grouped.std()
 
 queries = df["query"].unique()
 fig, axes = plt.subplots(2, 3, figsize=(16, 9))
@@ -33,10 +33,18 @@ axes = axes.flatten()
 for idx, query in enumerate(sorted(queries)):
     ax = axes[idx]
     for api in apis:
-        y    = [means.loc[(pct, query, api)] for pct in pcts]
-        yerr = [stds.loc[(pct, query, api)]  for pct in pcts]
-        ax.errorbar(pcts, y, yerr=yerr, label=api, color=colors[api],
-                    marker="o", capsize=4, linewidth=1.8)
+        y = [means.loc[(pct, query, api)] for pct in pcts]
+        yerr = [stds.loc[(pct, query, api)] for pct in pcts]
+        ax.errorbar(
+            pcts,
+            y,
+            yerr=yerr,
+            label=api,
+            color=colors[api],
+            marker="o",
+            capsize=4,
+            linewidth=1.8,
+        )
     ax.set_title(query, fontsize=10)
     ax.set_xlabel("Data Scale (%)")
     ax.set_ylabel("Avg Elapsed Time (sec)")
