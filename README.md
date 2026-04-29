@@ -230,7 +230,10 @@ Other useful targets:
 
 - AI assistance was used to help decide how to use the /stages API endpoint to fetch the desired system performance metrics
 
-- AI assistance was used to refactor the code such that it would work locally and on GCP (i.e. writing to a file)
+- AI assistance was used to refactor the code such that it would work locally and on GCP (i.e. writing to a file). This was especially helpful
+with refactoring code to efficiently run the benchmarks on GCP
+
+- AI assistance was used to help with figuring out the best way to visualize our benchmark JSON data
 
 ---
 

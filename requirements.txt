@@ -1,6 +1,6 @@
 pyspark==3.5.*
 python-dotenv
-jupyter
 matplotlib
 pandas
 pytest
+pytz
