@@ -22,21 +22,29 @@ df = pd.DataFrame(records)
 df = df[df["query"] == "perhost_traffic_profiling"]
 
 # Convert to MB
-df["shuffle_read_bytes"]  = df["shuffle_read_bytes"]  / (1024 ** 2)
-df["shuffle_write_bytes"] = df["shuffle_write_bytes"] / (1024 ** 2)
-df["shuffle_total"]       = df["shuffle_read_bytes"] + df["shuffle_write_bytes"]
+df["shuffle_read_bytes"] = df["shuffle_read_bytes"] / (1024**2)
+df["shuffle_write_bytes"] = df["shuffle_write_bytes"] / (1024**2)
+df["shuffle_total"] = df["shuffle_read_bytes"] + df["shuffle_write_bytes"]
 
 grouped = df.groupby(["scale_pct", "api"])["shuffle_total"]
 means = grouped.mean()
-stds  = grouped.std()
+stds = grouped.std()
 
 fig, ax = plt.subplots(figsize=(9, 5))
 
 for api in apis:
-    y    = [means.loc[(pct, api)] for pct in pcts]
-    yerr = [stds.loc[(pct, api)]  for pct in pcts]
-    ax.errorbar(pcts, y, yerr=yerr, label=api, color=colors[api],
-                marker="o", capsize=4, linewidth=1.8)
+    y = [means.loc[(pct, api)] for pct in pcts]
+    yerr = [stds.loc[(pct, api)] for pct in pcts]
+    ax.errorbar(
+        pcts,
+        y,
+        yerr=yerr,
+        label=api,
+        color=colors[api],
+        marker="o",
+        capsize=4,
+        linewidth=1.8,
+    )
 
 ax.set_xticks(pcts)
 ax.set_xlabel("Data Scale (%)")

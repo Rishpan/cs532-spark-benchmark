@@ -24,15 +24,23 @@ df = df[df["query"] == "perhost_traffic_profiling"]
 
 grouped = df.groupby(["scale_pct", "api"])["executor_cpu_time_sec"]
 means = grouped.mean()
-stds  = grouped.std()
+stds = grouped.std()
 
 fig, ax = plt.subplots(figsize=(9, 5))
 
 for api in apis:
-    y    = [means.loc[(pct, api)] for pct in pcts]
-    yerr = [stds.loc[(pct, api)]  for pct in pcts]
-    ax.errorbar(pcts, y, yerr=yerr, label=api, color=colors[api],
-                marker="o", capsize=4, linewidth=1.8)
+    y = [means.loc[(pct, api)] for pct in pcts]
+    yerr = [stds.loc[(pct, api)] for pct in pcts]
+    ax.errorbar(
+        pcts,
+        y,
+        yerr=yerr,
+        label=api,
+        color=colors[api],
+        marker="o",
+        capsize=4,
+        linewidth=1.8,
+    )
 
 ax.set_xticks(pcts)
 ax.set_xlabel("Data Scale (%)")
