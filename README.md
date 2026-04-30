@@ -228,21 +228,6 @@ Other useful targets:
 - Our scaling results in the following slides show that more data takes longer
 - We also have error bars that convince us that there isn't massive variation in our results
 
-```
-                   ┌──────────────────┐
-                   │   Parquet Files  │
-                   └────────┬─────────┘
-                            │
-        ┌───────────────────┼───────────────────┐
-        ▼                   ▼                   ▼
-   RDD API for a query  DataFrame API     SQL API for a query
-                         for a query
-        │                   │                   │
-        └───────────────────┼───────────────────┘
-                            ▼
-                       Assert Output
-```
-
 To run the suite locally (Parquet must already exist — see **Run preprocessing pipeline**):
 
 ```bash
