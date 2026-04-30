@@ -222,6 +222,71 @@ Other useful targets:
 
 ---
 
+## Test Cases
+
+We use `pytest` to assert that the **RDD**, **DataFrame**, and **SQL** implementations of every query produce **identical output** for the same input. This guarantees that any performance difference observed in the benchmarks comes from the execution engine — not from divergent query semantics.
+
+To run the suite locally (Parquet must already exist — see **Run preprocessing pipeline**):
+
+```bash
+pytest -v
+```
+
+## Experimental Results
+
+### Wall-clock execution time
+
+![Wall-clock execution time per query and API](analysis/figures/wall_clock_comparison.png)
+
+- **RDD is consistently the slowest API.** It works directly with JVM objects and has no query optimizer, so every transformation runs exactly as written.
+- **DataFrame and Spark SQL perform nearly identically**, even when comparing a "naive" implementation (e.g., per-host traffic profiling with five separate aggregations) against the optimized version. Catalyst rewrites both into the same efficient physical plan, so *how* the query is written matters very little once you cross into the declarative APIs.
+
+### Shuffle read/write volume
+
+![Shuffle read + write volume, stacked per query and API](analysis/figures/shuffle_rw_stacked.png)
+
+- **RDD has consistently higher shuffle volume** than DataFrame/SQL across queries. Without Catalyst's partial-aggregation rewrites, intermediate data crosses the shuffle boundary in full.
+- **Sessionization is high-shuffle for every API.** Window functions (`LAG` / time-gap detection) require all raw events for a key to be co-located, which is an unavoidable shuffle cost.
+- **The naive RDD per-host traffic profile is a pathological case:** five separate aggregations over the same base RDD produce five independent shuffles on the same data, blowing up shuffle volume.
+- **Temporal aggregation is excluded from the shuffle plots** because total shuffle data was under ~13 MB across all APIs — the values are too small to compare meaningfully.
+
+### Stages and tasks
+
+![Average stage and task counts per query and API](analysis/figures/stage_task_count.png)
+
+- **DataFrame and SQL produce more stages and tasks** than RDD for the same query. This is not a regression: Catalyst breaks each logical operation into finer-grained physical steps that can run in parallel.
+- This finer decomposition is what enables **partial (map-side) aggregation**, which in turn is what reduces shuffle volume relative to RDD.
+
+### Deserialize vs. CPU time
+
+![Executor deserialize time vs. CPU time](analysis/figures/deserialize_vs_cpu.png)
+
+- **Catalyst pushes pre-aggregation down to executors**, trading a small increase in CPU time for a large reduction in shuffle volume. RDD, with no optimizer, lacks this trade-off entirely.
+- **The naive RDD per-host pipeline shows high deserialization time**, which tracks directly with its high shuffle volume.
+- For all other (query, API) combinations besides sessionization and naive RDD, shuffle volume stays under ~50 MB and deserialization time is correspondingly low.
+
+### Scaling analysis (5% → 100% of the dataset)
+
+![Wall-clock time across dataset scales](analysis/figures/wall_clock_scaling.png)
+
+- **Wall-clock scaling.** RDD wall-clock time grows roughly with input size — it has no optimizer to amortize costs. DataFrame/SQL scale much more gracefully because Catalyst's pre-aggregation keeps the post-shuffle workload nearly constant.
+- **Sessionization is the exception:** windowing requires all raw events, so no API can pre-aggregate it away, and all three scale similarly.
+- **Catalyst compensates for naive code.** Even when we deliberately wrote a sub-optimal per-host traffic-profiling query, the DataFrame and SQL versions scaled identically to the optimized version, while the RDD versions diverged.
+
+![CPU time scaling for per-host traffic profiling](analysis/figures/cpu_scaling_perhost.png)
+
+- **CPU scaling (per-host traffic profiling).** RDD CPU time grows roughly linearly with input size; DataFrame/SQL absorb most of the growth via Catalyst's pushed-down pre-aggregation, so CPU time grows much more slowly.
+
+![Shuffle volume scaling for per-host traffic profiling](analysis/figures/shuffle_scaling_perhost.png)
+
+- **Shuffle scaling.** For every non-sessionization query, DataFrame/SQL shuffle volume is **nearly invariant to dataset size**, while RDD shuffle volume grows roughly linearly. This is the clearest single piece of evidence for Catalyst's value: it converts what would otherwise be O(N) network I/O into O(1) (in the size of the aggregated output).
+
+### Summary
+
+The takeaway is consistent with Spark's design intent: the DataFrame and SQL APIs let Catalyst do the work that an RDD programmer would otherwise have to do by hand, and on this workload it does that work at least as well as our hand-tuned RDD code — with the single, expected exception of window-bound queries like sessionization, where no optimizer can avoid the underlying shuffle.
+
+---
+
 ## AI Usage
 
 - This project used AI assistance (Claude via Cursor) to help design the implement the GCP Dataproc deployment pipeline, and debug compatibility issues across Spark, Java, and GCS. All AI-generated code was reviewed, tested, and integrated by the project team.
